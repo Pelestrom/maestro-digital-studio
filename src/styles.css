@@ -192,6 +192,10 @@
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes fade-up-blur {
+  from { opacity: 0; transform: translateY(28px); filter: blur(8px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
 @keyframes cursor-blink {
   0%, 50% { opacity: 1; }
   50.01%, 100% { opacity: 0; }
@@ -200,13 +204,89 @@
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
 }
-@keyframes marquee-bg-pulse {
-  0%, 100% { opacity: 0.95; }
-  50% { opacity: 1; }
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(45deg); }
+  50% { transform: translateY(-18px) rotate(48deg); }
+}
+@keyframes float-slow-rev {
+  0%, 100% { transform: translateY(0) rotate(45deg); }
+  50% { transform: translateY(14px) rotate(42deg); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes argyle-drift {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 160px 160px, -160px 160px; }
+}
+@keyframes grain {
+  0%, 100% { transform: translate(0,0); }
+  10% { transform: translate(-2%, -3%); }
+  30% { transform: translate(3%, 1%); }
+  50% { transform: translate(-1%, 4%); }
+  70% { transform: translate(2%, -2%); }
+  90% { transform: translate(-3%, 1%); }
 }
 
 .cursor-blink { animation: cursor-blink 0.9s step-end infinite; }
 .fade-in { animation: fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.fade-up-blur { animation: fade-up-blur 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.float-slow { animation: float-slow 7s ease-in-out infinite; }
+.float-slow-rev { animation: float-slow-rev 9s ease-in-out infinite; }
+
+.text-shimmer {
+  background: linear-gradient(90deg,
+    var(--color-blue-accent) 0%,
+    var(--color-blue-light) 45%,
+    #ffffff 50%,
+    var(--color-blue-light) 55%,
+    var(--color-blue-accent) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 4.5s linear infinite;
+}
+
+.argyle-bg {
+  background-image:
+    linear-gradient(135deg, transparent 47%, rgba(59,111,204,0.18) 49%, rgba(59,111,204,0.18) 51%, transparent 53%),
+    linear-gradient(45deg,  transparent 47%, rgba(123,167,220,0.10) 49%, rgba(123,167,220,0.10) 51%, transparent 53%);
+  background-size: 80px 80px, 80px 80px;
+  animation: argyle-drift 40s linear infinite;
+}
+
+.grain-overlay { position: relative; }
+.grain-overlay::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.35'/></svg>");
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  animation: grain 1.2s steps(6) infinite;
+}
+
+.glow-ring {
+  box-shadow:
+    0 0 0 1px rgba(59,111,204,0.25),
+    0 20px 60px -10px rgba(59,111,204,0.35),
+    0 40px 100px -30px rgba(27,42,74,0.55);
+}
+
+.magnetic-cta { position: relative; isolation: isolate; overflow: hidden; }
+.magnetic-cta::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform .8s cubic-bezier(.22,1,.36,1);
+  z-index: 0;
+  pointer-events: none;
+}
+.magnetic-cta:hover::before { transform: translateX(100%); }
+.magnetic-cta > * { position: relative; z-index: 1; }
 
 /* ============================================================
    Reduced motion
@@ -220,16 +300,10 @@
   }
 }
 
-/* Page-loader hides body scroll briefly */
 html.maestro-loading body { overflow: hidden; }
 
-/* Selection */
-::selection {
-  background: var(--color-blue-accent);
-  color: #fff;
-}
+::selection { background: var(--color-blue-accent); color: #fff; }
 
-/* Scrollbar — minimal */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--color-grey-mid); border-radius: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
