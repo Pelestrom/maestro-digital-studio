@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/sections/Hero";
 import { TypewriterStrip } from "@/components/sections/TypewriterStrip";
-import { Stats } from "@/components/sections/Stats";
 import { FeaturedProjects } from "@/components/sections/FeaturedProjects";
 import { Services } from "@/components/sections/Services";
 import { TestimonialsCarousel } from "@/components/sections/TestimonialsCarousel";
+import { ScrollFadeSection } from "@/components/scroll/ScrollFadeSection";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Portfolio de Le Maestro du Digital. 2 ans d'expérience, 100+ projets, identités visuelles premium pour marques ambitieuses.",
+          "Portfolio de Le Maestro du Digital. Identités visuelles premium pour marques ambitieuses.",
       },
       { property: "og:title", content: "Le Maestro du Digital — Portfolio" },
       { property: "og:description", content: "Identités visuelles premium pour marques ambitieuses." },
@@ -27,12 +27,11 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <>
-      <Hero />
-      <TypewriterStrip />
-      <Stats />
-      <FeaturedProjects />
-      <Services />
-      <TestimonialsCarousel />
+      <ScrollFadeSection><Hero /></ScrollFadeSection>
+      <ScrollFadeSection><TypewriterStrip /></ScrollFadeSection>
+      <ScrollFadeSection><FeaturedProjects /></ScrollFadeSection>
+      <ScrollFadeSection><Services /></ScrollFadeSection>
+      <ScrollFadeSection><TestimonialsCarousel /></ScrollFadeSection>
     </>
   );
 }
