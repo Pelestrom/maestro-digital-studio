@@ -34,9 +34,19 @@ export const Route = createFileRoute("/portfolio/$slug")({
 
 function ProjectPage() {
   const { slug } = Route.useParams();
-  const { data: project } = useQuery(projectBySlugQuery(slug));
+  const projectQ = useQuery(projectBySlugQuery(slug));
+  const project = projectQ.data;
   const { data: all = [] } = useQuery(projectsQuery());
-  if (!project) return null;
+  if (projectQ.isLoading) return <div className="min-h-screen" />;
+  if (!project) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>404</div>
+        <h1 className="text-h2 mt-4">Projet introuvable</h1>
+        <Link to="/portfolio" className="story-link mt-6 inline-block">Retour au portfolio</Link>
+      </div>
+    </div>
+  );
 
   const cat = categoryMeta(project.category as string);
   const related = all
