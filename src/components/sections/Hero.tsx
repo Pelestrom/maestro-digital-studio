@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { aboutContentQuery } from "@/lib/queries";
+import { useCountUp, useInView } from "@/lib/hooks/useCountUp";
 import beretAsset from "@/assets/maestro-beret.png.asset.json";
 import seatedAsset from "@/assets/maestro-seated.png.asset.json";
 
@@ -91,6 +92,32 @@ export function PhotoCarousel3D() {
   );
 }
 
+const HERO_STATS = [
+  { value: 2, suffix: "+", label: "Années\nd'expérience" },
+  { value: 100, suffix: "+", label: "Projets\nréalisés" },
+  { value: 10, suffix: "+", label: "Clients\naccompagnés" },
+  { value: 100, suffix: "%", label: "Satisfaction\nclients" },
+] as const;
+
+function HeroStat({ value, suffix, label, delay }: (typeof HERO_STATS)[number] & { delay: number }) {
+  const { ref, inView } = useInView<HTMLDivElement>();
+  const n = useCountUp(value, inView, 1800);
+  return (
+    <div ref={ref} style={{ animationDelay: `${delay}ms` }} className="fade-up-blur">
+      <div
+        className="font-display leading-none"
+        style={{ color: "var(--color-blue-light)", fontSize: "clamp(1.75rem, 3.2vw, 2.5rem)" }}
+      >
+        {n}
+        <span style={{ color: "var(--color-blue-accent)" }}>{suffix}</span>
+      </div>
+      <div className="label-mono mt-2 whitespace-pre-line" style={{ color: "#9a9aa5", fontSize: "0.7rem" }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
 export function Hero() {
   return (
     <section
@@ -114,14 +141,13 @@ export function Hero() {
             Graphic Designer &amp; Directeur Artistique
           </div>
           <h1 className="text-hero mt-6">
-            <span className="block fade-up-blur" style={{ animationDelay: "80ms" }}>Le Maestro</span>
-            <span className="block fade-up-blur text-shimmer" style={{ animationDelay: "220ms" }}>du Digital</span>
-            <span className="block fade-up-blur italic" style={{ animationDelay: "360ms", color: "#fff" }}>
+            <span className="block fade-up-blur" style={{ animationDelay: "80ms", color: "#FFFFFF" }}>Le Maestro</span>
+            <span className="block fade-up-blur" style={{ animationDelay: "220ms", color: "#3B6FCC" }}>du Digital</span>
+            <span className="block fade-up-blur italic" style={{ animationDelay: "360ms", color: "#FFFFFF" }}>
               crée<span style={{ color: "var(--color-blue-accent)" }}>.</span>
             </span>
           </h1>
           <p className="mt-8 max-w-md text-base fade-up-blur" style={{ color: "#C4C4CC", animationDelay: "520ms" }}>
-            2 ans d'expérience · 100+ projets · 10+ clients accompagnés.<br />
             Je conçois des identités visuelles percutantes pour des marques ambitieuses.
           </p>
           <div className="mt-10 flex flex-wrap gap-4 fade-up-blur" style={{ animationDelay: "680ms" }}>
@@ -142,16 +168,9 @@ export function Hero() {
             </Link>
           </div>
 
-          <div className="mt-14 grid grid-cols-3 gap-6 max-w-md fade-up-blur" style={{ animationDelay: "820ms" }}>
-            {[
-              { n: "2", l: "Années" },
-              { n: "100+", l: "Projets" },
-              { n: "10+", l: "Clients" },
-            ].map((s) => (
-              <div key={s.l}>
-                <div className="font-display text-3xl" style={{ color: "var(--color-blue-light)" }}>{s.n}</div>
-                <div className="label-mono mt-1" style={{ color: "#7a7a85" }}>{s.l}</div>
-              </div>
+          <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-xl">
+            {HERO_STATS.map((s, i) => (
+              <HeroStat key={s.label} {...s} delay={820 + i * 150} />
             ))}
           </div>
         </div>

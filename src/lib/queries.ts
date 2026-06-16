@@ -120,12 +120,12 @@ export const settingsQuery = () =>
   });
 
 export const CATEGORIES = [
-  { slug: "branding", label: "Branding & Identity", emoji: "🎨", color: "#3B6FCC" },
-  { slug: "social-media", label: "Social Media Design", emoji: "📱", color: "#4A6FA5" },
-  { slug: "print", label: "Print Design", emoji: "🖨️", color: "#5C3A1E" },
-  { slug: "web-ui", label: "Web & UI Design", emoji: "🖥️", color: "#1B2A4A" },
-  { slug: "presentation", label: "Presentation Design", emoji: "📊", color: "#2C5530" },
-  { slug: "photo-editing", label: "Photo Editing & Manipulation", emoji: "📸", color: "#7BA7DC" },
+  { slug: "branding", label: "Branding & Identity", emoji: "🎨", icon: "Palette", color: "#3B6FCC" },
+  { slug: "social-media", label: "Social Media Design", emoji: "📱", icon: "Share2", color: "#4A6FA5" },
+  { slug: "print", label: "Print Design", emoji: "🖨️", icon: "Printer", color: "#5C3A1E" },
+  { slug: "web-ui", label: "Web & UI Design", emoji: "🖥️", icon: "Monitor", color: "#1B2A4A" },
+  { slug: "presentation", label: "Presentation Design", emoji: "📊", icon: "Presentation", color: "#2C5530" },
+  { slug: "photo-editing", label: "Photo Editing & Manipulation", emoji: "📸", icon: "Image", color: "#7BA7DC" },
 ] as const;
 
 export type CategorySlug = (typeof CATEGORIES)[number]["slug"];
@@ -135,5 +135,6 @@ export const categoryMeta = (slug: string) =>
     slug,
     label: slug,
     emoji: "✦",
+    icon: "Grid3X3",
     color: "#3B6FCC",
   };

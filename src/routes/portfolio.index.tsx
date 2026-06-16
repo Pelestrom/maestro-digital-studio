@@ -1,7 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Grid3X3,
+  Palette,
+  Share2,
+  Printer,
+  Monitor,
+  Presentation,
+  Image as ImageIcon,
+  ChevronDown,
+  Check,
+} from "lucide-react";
 import { CATEGORIES, categoryMeta, projectsQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/portfolio/")({
@@ -18,6 +29,23 @@ export const Route = createFileRoute("/portfolio/")({
   ssr: false,
   component: PortfolioIndex,
 });
+
+const ICONS: Record<string, React.ComponentType<{ className?: string; size?: number; style?: React.CSSProperties }>> = {
+  Grid3X3,
+  Palette,
+  Share2,
+  Printer,
+  Monitor,
+  Presentation,
+  Image: ImageIcon,
+};
+
+type Option = { slug: string; label: string; icon: string };
+
+const OPTIONS: Option[] = [
+  { slug: "all", label: "Toutes les catégories", icon: "Grid3X3" },
+  ...CATEGORIES.map((c) => ({ slug: c.slug, label: c.label, icon: c.icon })),
+];
 
 function PortfolioIndex() {
   const { data: projects = [] } = useQuery(projectsQuery());
@@ -41,17 +69,9 @@ function PortfolioIndex() {
           </p>
         </div>
 
-        <div className="sticky top-16 z-30 -mx-6 px-6 py-4 mb-10 bg-white/80 backdrop-blur border-b border-border">
-          <div className="flex flex-wrap items-center gap-2">
-            <FilterPill active={active === "all"} onClick={() => setActive("all")} label="Tous" />
-            {CATEGORIES.map((c) => (
-              <FilterPill
-                key={c.slug}
-                active={active === c.slug}
-                onClick={() => setActive(c.slug)}
-                label={`${c.emoji} ${c.label}`}
-              />
-            ))}
+        <div className="sticky top-16 z-30 -mx-6 px-6 py-4 mb-10 bg-white/85 backdrop-blur border-b border-border">
+          <div className="flex flex-wrap items-center gap-4">
+            <CategoryDropdown value={active} onChange={setActive} />
             <span className="ml-auto label-mono" style={{ color: "var(--color-blue-accent)" }}>
               {filtered.length} projet{filtered.length > 1 ? "s" : ""}
             </span>
@@ -62,6 +82,7 @@ function PortfolioIndex() {
           <AnimatePresence mode="popLayout">
             {filtered.map((p) => {
               const cat = categoryMeta(p.category as string);
+              const Icon = ICONS[cat.icon] ?? Grid3X3;
               return (
                 <motion.div
                   key={p.id as string}
@@ -94,7 +115,10 @@ function PortfolioIndex() {
                       className="absolute inset-0 flex flex-col justify-end p-5 text-white"
                       style={{ background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 55%)" }}
                     >
-                      <div className="label-mono opacity-80">{cat.emoji} {cat.label}</div>
+                      <div className="label-mono opacity-80 inline-flex items-center gap-1.5">
+                        <Icon size={14} />
+                        <span>{cat.label}</span>
+                      </div>
                       <div className="font-display text-xl mt-1">{p.title as string}</div>
                       {p.client && (
                         <div className="text-xs text-white/70 mt-1">{p.client as string} {p.year ? `· ${p.year}` : ""}</div>
@@ -117,19 +141,101 @@ function PortfolioIndex() {
   );
 }
 
-function FilterPill({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+function CategoryDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const current = OPTIONS.find((o) => o.slug === value) ?? OPTIONS[0];
+  const CurrentIcon = ICONS[current.icon] ?? Grid3X3;
+
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
   return (
-    <button
-      onClick={onClick}
-      className="rounded-full px-4 py-2 text-xs label-mono border transition-all"
-      style={{
-        borderColor: active ? "var(--color-blue-accent)" : "var(--color-border)",
-        background: active ? "var(--color-blue-accent)" : "transparent",
-        color: active ? "#fff" : "var(--color-charcoal)",
-        transform: active ? "scale(1.04)" : "scale(1)",
-      }}
-    >
-      {label}
-    </button>
+    <>
+      {/* Mobile: native select */}
+      <div className="sm:hidden w-full">
+        <div className="relative">
+          <CurrentIcon className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" size={18} />
+          <select
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full appearance-none pl-10 pr-10 py-2.5 rounded-full text-sm border bg-white"
+            style={{ borderColor: "#3B6FCC", color: "var(--color-charcoal)" }}
+            aria-label="Filtrer par catégorie"
+          >
+            {OPTIONS.map((o) => (
+              <option key={o.slug} value={o.slug}>{o.label}</option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" size={16} />
+        </div>
+      </div>
+
+      {/* Desktop: custom dropdown */}
+      <div ref={wrapRef} className="hidden sm:block relative">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full text-sm bg-white border transition-all hover:bg-[#EEF2FF]"
+          style={{ borderColor: "#3B6FCC", color: "var(--color-charcoal)" }}
+        >
+          <CurrentIcon size={18} style={{ color: "#3B6FCC" }} />
+          <span className="label-mono">{current.label}</span>
+          <ChevronDown size={16} className="transition-transform" style={{ transform: open ? "rotate(180deg)" : "none" }} />
+        </button>
+
+        <AnimatePresence>
+          {open && (
+            <motion.ul
+              role="listbox"
+              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.98 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute z-40 mt-2 left-0 min-w-[280px] py-2 rounded-2xl bg-white border shadow-xl overflow-hidden"
+              style={{ borderColor: "#3B6FCC" }}
+            >
+              {OPTIONS.map((o) => {
+                const Icon = ICONS[o.icon] ?? Grid3X3;
+                const isActive = o.slug === value;
+                return (
+                  <li key={o.slug}>
+                    <button
+                      type="button"
+                      onClick={() => { onChange(o.slug); setOpen(false); }}
+                      role="option"
+                      aria-selected={isActive}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors hover:bg-[#EEF2FF]"
+                      style={{
+                        background: isActive ? "#3B6FCC" : "transparent",
+                        color: isActive ? "#fff" : "var(--color-charcoal)",
+                      }}
+                    >
+                      <Icon size={16} />
+                      <span className="flex-1">{o.label}</span>
+                      {isActive && <Check size={14} />}
+                    </button>
+                  </li>
+                );
+              })}
+            </motion.ul>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 }
