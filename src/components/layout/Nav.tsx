@@ -22,6 +22,8 @@ export function Navbar() {
 
   useEffect(() => setOpen(false), [path]);
 
+  const textColor = scrolled ? "var(--color-charcoal)" : "#FFFFFF";
+
   return (
     <header
       className="fixed inset-x-0 top-0 z-50 transition-all duration-300"
@@ -38,7 +40,7 @@ export function Navbar() {
             style={{ background: "var(--color-blue-accent)" }}
             aria-hidden
           />
-          <span className="font-display text-lg tracking-tight" style={{ color: "var(--color-charcoal)" }}>
+          <span className="font-display text-lg tracking-tight transition-colors" style={{ color: textColor }}>
             Le Maestro <span style={{ color: "var(--color-blue-accent)" }}>du Digital</span>
           </span>
         </Link>
@@ -50,8 +52,8 @@ export function Navbar() {
               <Link
                 key={n.to}
                 to={n.to}
-                className="story-link text-sm"
-                style={{ color: active ? "var(--color-blue-accent)" : "var(--color-charcoal)" }}
+                className="story-link text-sm transition-colors"
+                style={{ color: active ? "var(--color-blue-accent)" : textColor }}
               >
                 {n.label}
               </Link>
@@ -71,6 +73,7 @@ export function Navbar() {
           className="md:hidden inline-flex items-center justify-center w-10 h-10"
           aria-label="Menu"
           onClick={() => setOpen((o) => !o)}
+          style={{ color: textColor }}
         >
           <div className="relative w-5 h-3">
             <span

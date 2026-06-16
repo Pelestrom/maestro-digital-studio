@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   aboutContentQuery,
   certificationsQuery,
-  experienceQuery,
   skillsQuery,
   toolsQuery,
 } from "@/lib/queries";
@@ -30,7 +29,6 @@ function AboutPage() {
   const { data: tools = [] } = useQuery(toolsQuery());
   const { data: skills = [] } = useQuery(skillsQuery());
   const { data: certs = [] } = useQuery(certificationsQuery());
-  const { data: timeline = [] } = useQuery(experienceQuery());
 
   return (
     <div className="pt-32">
@@ -77,24 +75,6 @@ function AboutPage() {
         </div>
       </section>
 
-      {/* Timeline */}
-      {timeline.length > 0 && (
-        <section className="container-x py-24">
-          <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Parcours</div>
-          <h2 className="text-h2 mt-4 mb-12">Mon expérience</h2>
-          <ol className="relative border-l-2 pl-8 space-y-10" style={{ borderColor: "var(--color-blue-accent)" }}>
-            {timeline.map((e) => (
-              <li key={e.id as string} className="relative">
-                <span className="absolute -left-[37px] top-1 w-3 h-3 rotate-45" style={{ background: "var(--color-blue-accent)" }} />
-                <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>{e.year as string}</div>
-                <div className="font-display text-xl mt-1">{e.role as string}</div>
-                {e.company && <div className="text-sm text-muted-foreground">{e.company as string}</div>}
-                {e.description && <p className="text-sm mt-2 text-charcoal max-w-prose" style={{ color: "var(--color-charcoal)" }}>{e.description as string}</p>}
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
 
       {/* Tools */}
       <section className="py-24" style={{ background: "var(--color-grey-soft)" }}>

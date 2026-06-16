@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Typewriter that cycles through a list of words: type → hold → erase → next.
+ * Calls onTypeChar each time a new character is appended (typing phase only).
  */
 export function useTypewriter(
   words: string[],
@@ -10,12 +11,15 @@ export function useTypewriter(
     deleteSpeed?: number;
     holdTime?: number;
     pauseTime?: number;
+    onTypeChar?: () => void;
   } = {},
 ) {
-  const { typeSpeed = 60, deleteSpeed = 35, holdTime = 1800, pauseTime = 300 } = opts;
+  const { typeSpeed = 60, deleteSpeed = 35, holdTime = 1800, pauseTime = 300, onTypeChar } = opts;
   const [index, setIndex] = useState(0);
   const [text, setText] = useState("");
   const [phase, setPhase] = useState<"typing" | "holding" | "erasing" | "pausing">("typing");
+  const onTypeCharRef = useRef(onTypeChar);
+  onTypeCharRef.current = onTypeChar;
 
   useEffect(() => {
     if (!words.length) return;
@@ -24,7 +28,10 @@ export function useTypewriter(
 
     if (phase === "typing") {
       if (text.length < word.length) {
-        timer = setTimeout(() => setText(word.slice(0, text.length + 1)), typeSpeed);
+        timer = setTimeout(() => {
+          setText(word.slice(0, text.length + 1));
+          onTypeCharRef.current?.();
+        }, typeSpeed);
       } else {
         timer = setTimeout(() => setPhase("holding"), 0);
       }
