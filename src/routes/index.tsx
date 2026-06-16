@@ -1,29 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Hero } from "@/components/sections/Hero";
+import { TypewriterStrip } from "@/components/sections/TypewriterStrip";
+import { Stats } from "@/components/sections/Stats";
+import { FeaturedProjects } from "@/components/sections/FeaturedProjects";
+import { Services } from "@/components/sections/Services";
+import { TestimonialsCarousel } from "@/components/sections/TestimonialsCarousel";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Le Maestro du Digital — Graphic Designer & Directeur Artistique" },
+      {
+        name: "description",
+        content:
+          "Portfolio de Le Maestro du Digital. 2 ans d'expérience, 100+ projets, identités visuelles premium pour marques ambitieuses.",
+      },
+      { property: "og:title", content: "Le Maestro du Digital — Portfolio" },
+      { property: "og:description", content: "Identités visuelles premium pour marques ambitieuses." },
+      { property: "og:url", content: "/" },
     ],
+    links: [{ rel: "canonical", href: "/" }],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <>
+      <Hero />
+      <TypewriterStrip />
+      <Stats />
+      <FeaturedProjects />
+      <Services />
+      <TestimonialsCarousel />
+    </>
   );
 }
