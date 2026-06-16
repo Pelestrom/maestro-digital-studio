@@ -1,9 +1,9 @@
 import { useCountUp, useInView } from "@/lib/hooks/useCountUp";
 
 const STATS = [
-  { value: 2, suffix: "+", label: "Années\nd'expérience" },
-  { value: 100, suffix: "+", label: "Projets\nréalisés" },
-  { value: 10, suffix: "+", label: "Clients\naccompagnés" },
+  { value: 0, suffix: "\n", label: "\n" },
+  { value: 0, suffix: "\u00a0", label: "\u00a0" },
+  { value: 0, suffix: "\u00a0", label: "\u00a0" },
   { value: 100, suffix: "%", label: "Satisfaction\nclients" },
 ] as const;
 
