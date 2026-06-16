@@ -8,6 +8,7 @@ import {
   toolsQuery,
 } from "@/lib/queries";
 import { useInView } from "@/lib/hooks/useCountUp";
+import seatedAsset from "@/assets/maestro-seated.png.asset.json";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -43,17 +44,20 @@ function AboutPage() {
               "Designer graphique et directeur artistique, je conçois des identités visuelles sophistiquées pour marques ambitieuses."}
           </p>
         </div>
-        <div className="relative aspect-[4/5] rounded-lg overflow-hidden" style={{ background: "var(--color-grey-soft)" }}>
-          {about?.profile_photo ? (
-            <img src={about.profile_photo as string} alt="Le Maestro du Digital" className="absolute inset-0 h-full w-full object-cover" />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(160deg, #1B2A4A, #1A1A1A)" }}>
-              <div className="text-center text-white/70">
-                <div className="font-display text-6xl">M</div>
-                <div className="label-mono mt-2">Portrait à venir</div>
-              </div>
+        <div className="relative aspect-[4/5] rounded-2xl overflow-hidden glow-ring group" style={{ background: "var(--color-grey-soft)" }}>
+          <img
+            src={(about?.profile_photo as string) || seatedAsset.url}
+            alt="Le Maestro du Digital"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.05]"
+          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+          <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between text-white">
+            <div>
+              <div className="font-display text-2xl">Le Maestro</div>
+              <div className="label-mono text-white/70">Designer · DA</div>
             </div>
-          )}
+            <div className="w-8 h-8 rotate-45 border border-white/60" aria-hidden />
+          </div>
         </div>
       </section>
 

@@ -1,0 +1,1 @@
+UPDATE public.about_content SET hero_photos = '["/__l5e/assets-v1/46e06433-5116-4b7b-afd5-4159e6e463dd/maestro-beret.png","/__l5e/assets-v1/bad6c237-7e01-4c12-a854-41e4736c00c3/maestro-seated.png"]'::jsonb, profile_photo = '/__l5e/assets-v1/bad6c237-7e01-4c12-a854-41e4736c00c3/maestro-seated.png';
