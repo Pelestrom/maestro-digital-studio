@@ -3,28 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { categoryMeta, projectBySlugQuery, projectsQuery } from "@/lib/queries";
 
 export const Route = createFileRoute("/portfolio/$slug")({
-  loader: async ({ context, params }) => {
-    const p = await context.queryClient.ensureQueryData(projectBySlugQuery(params.slug));
-    if (!p) throw notFound();
-    context.queryClient.ensureQueryData(projectsQuery());
-    return { project: p };
-  },
-  head: ({ loaderData }) => {
-    const p = loaderData?.project as any;
-    const title = p ? `${p.title} — Le Maestro du Digital` : "Projet — Le Maestro du Digital";
-    const desc = p?.description ?? "Projet du portfolio de Le Maestro du Digital.";
-    return {
-      meta: [
-        { title },
-        { name: "description", content: desc },
-        { property: "og:title", content: title },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "article" },
-        ...(p?.cover_image ? [{ property: "og:image", content: p.cover_image }] : []),
-      ],
-      links: [{ rel: "canonical", href: `/portfolio/${p?.slug ?? ""}` }],
-    };
-  },
+  ssr: false,
+  head: ({ params }) => ({
+    meta: [
+      { title: `${params.slug} — Le Maestro du Digital` },
+      { property: "og:title", content: `${params.slug} — Le Maestro du Digital` },
+    ],
+    links: [{ rel: "canonical", href: `/portfolio/${params.slug}` }],
+  }),
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">

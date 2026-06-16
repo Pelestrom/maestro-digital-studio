@@ -20,13 +20,7 @@ export const Route = createFileRoute("/about")({
     ],
     links: [{ rel: "canonical", href: "/about" }],
   }),
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(aboutContentQuery());
-    context.queryClient.ensureQueryData(toolsQuery());
-    context.queryClient.ensureQueryData(skillsQuery());
-    context.queryClient.ensureQueryData(certificationsQuery());
-    context.queryClient.ensureQueryData(experienceQuery());
-  },
+  ssr: false,
   component: AboutPage,
 });
 

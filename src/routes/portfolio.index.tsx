@@ -15,7 +15,7 @@ export const Route = createFileRoute("/portfolio/")({
     ],
     links: [{ rel: "canonical", href: "/portfolio" }],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(projectsQuery()),
+  ssr: false,
   component: PortfolioIndex,
 });
 
