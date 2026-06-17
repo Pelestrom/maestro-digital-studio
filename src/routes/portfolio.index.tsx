@@ -1,19 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Grid3X3,
-  Palette,
-  Share2,
-  Printer,
-  Monitor,
-  Presentation,
-  Image as ImageIcon,
-  ChevronDown,
-  Check,
-} from "lucide-react";
+import { Grid3X3 } from "lucide-react";
 import { CATEGORIES, categoryMeta, projectsQuery } from "@/lib/queries";
+import { CategorySelect, CATEGORY_ICONS, type CategoryOption } from "@/components/ui/CategorySelect";
 
 export const Route = createFileRoute("/portfolio/")({
   head: () => ({
@@ -30,22 +21,11 @@ export const Route = createFileRoute("/portfolio/")({
   component: PortfolioIndex,
 });
 
-const ICONS: Record<string, React.ComponentType<{ className?: string; size?: number; style?: React.CSSProperties }>> = {
-  Grid3X3,
-  Palette,
-  Share2,
-  Printer,
-  Monitor,
-  Presentation,
-  Image: ImageIcon,
-};
-
-type Option = { slug: string; label: string; icon: string };
-
-const OPTIONS: Option[] = [
-  { slug: "all", label: "Toutes les catégories", icon: "Grid3X3" },
-  ...CATEGORIES.map((c) => ({ slug: c.slug, label: c.label, icon: c.icon })),
+const FILTER_OPTIONS: CategoryOption[] = [
+  { value: "all", label: "Toutes les catégories", icon: "Grid3X3" },
+  ...CATEGORIES.map((c) => ({ value: c.slug, label: c.label, icon: c.icon })),
 ];
+
 
 function PortfolioIndex() {
   const { data: projects = [] } = useQuery(projectsQuery());
