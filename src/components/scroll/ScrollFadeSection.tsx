@@ -7,8 +7,12 @@ if (typeof window !== "undefined") {
 }
 
 /**
- * Wraps a section and fades it out on scroll using GSAP ScrollTrigger.
- * Respects prefers-reduced-motion.
+ * Parallax Stack — each section glides up slightly slower than the page scroll
+ * and gently recedes (subtle scale) so the next section appears to slide over it.
+ * No blur, no white overlay, no opacity fade — strictly transform-based for 60fps.
+ *
+ * - Honors prefers-reduced-motion
+ * - Wraps the section in a 3D layer so transforms stay GPU-composited
  */
 export function ScrollFadeSection({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -21,26 +25,35 @@ export function ScrollFadeSection({ children }: { children: ReactNode }) {
     if (!el) return;
 
     const ctx = gsap.context(() => {
-      gsap.to(el, {
-        opacity: 0,
-        scale: 0.96,
-        y: -40,
-        filter: "blur(4px)",
-        ease: "none",
-        scrollTrigger: {
-          trigger: el,
-          start: "top top+=80",
-          end: "bottom top+=60",
-          scrub: true,
+      gsap.fromTo(
+        el,
+        { yPercent: 0, scale: 1 },
+        {
+          yPercent: -8,
+          scale: 0.985,
+          ease: "none",
+          scrollTrigger: {
+            trigger: el,
+            start: "top top",
+            end: "bottom top",
+            scrub: 0.5,
+          },
         },
-      });
+      );
     }, el);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <div ref={ref} style={{ willChange: "opacity, transform, filter" }}>
+    <div
+      ref={ref}
+      style={{
+        transformOrigin: "center top",
+        willChange: "transform",
+        backfaceVisibility: "hidden",
+      }}
+    >
       {children}
     </div>
   );

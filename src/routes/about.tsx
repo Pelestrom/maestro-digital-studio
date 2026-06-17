@@ -60,7 +60,7 @@ function AboutPage() {
       </section>
 
       {/* Values */}
-      <section className="py-20" style={{ background: "var(--color-grey-soft)" }}>
+      <section className="pt-16 pb-10" style={{ background: "var(--color-grey-soft)" }}>
         <div className="container-x grid md:grid-cols-3 gap-8">
           {[
             { label: "Précision", text: "Chaque détail compte. Du pixel à la grille typographique." },
@@ -69,15 +69,14 @@ function AboutPage() {
           ].map((v) => (
             <div key={v.label}>
               <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>{v.label}</div>
-              <p className="mt-3 text-sm text-charcoal" style={{ color: "var(--color-charcoal)" }}>{v.text}</p>
+              <p className="mt-3 text-sm" style={{ color: "var(--color-charcoal)" }}>{v.text}</p>
             </div>
           ))}
         </div>
       </section>
 
-
       {/* Tools */}
-      <section className="py-24" style={{ background: "var(--color-grey-soft)" }}>
+      <section className="pt-16 pb-24 bg-white border-t border-border">
         <div className="container-x">
           <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Outils</div>
           <h2 className="text-h2 mt-4 mb-12">Mes outils</h2>
@@ -88,6 +87,7 @@ function AboutPage() {
           </div>
         </div>
       </section>
+
 
       {/* Skills */}
       {skills.length > 0 && (
