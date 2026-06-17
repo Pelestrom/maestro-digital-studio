@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { submitContact, ContactSchema, type ContactInput } from "@/lib/contact.functions";
 import { CATEGORIES } from "@/lib/queries";
+import { CategorySelect, type CategoryOption } from "@/components/ui/CategorySelect";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -20,10 +21,11 @@ export const Route = createFileRoute("/contact")({
 
 type FormState = "idle" | "loading" | "success" | "error";
 
-const PROJECT_TYPES = [
-  ...CATEGORIES.map((c) => ({ value: c.label, label: `${c.emoji} ${c.label}` })),
-  { value: "Autre", label: "Autre" },
+const PROJECT_TYPES: CategoryOption[] = [
+  ...CATEGORIES.map((c) => ({ value: c.label, label: c.label, icon: c.icon })),
+  { value: "Autre", label: "Autre", icon: "Grid3X3" },
 ];
+
 
 function ContactPage() {
   const send = useServerFn(submitContact);
@@ -141,16 +143,16 @@ function ContactPage() {
               />
             </Field>
             <Field label="Type de projet" error={errors.projectType}>
-              <select
-                value={form.projectType}
-                onChange={(e) => onChange("projectType", e.target.value)}
-                className={inputCls}
-              >
-                {PROJECT_TYPES.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
+              <div className="mt-2">
+                <CategorySelect
+                  value={form.projectType}
+                  onChange={(v) => onChange("projectType", v)}
+                  options={PROJECT_TYPES}
+                  ariaLabel="Type de projet"
+                />
+              </div>
             </Field>
+
             <Field label="Message" error={errors.message}>
               <textarea
                 value={form.message}

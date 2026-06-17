@@ -26,7 +26,6 @@ const FILTER_OPTIONS: CategoryOption[] = [
   ...CATEGORIES.map((c) => ({ value: c.slug, label: c.label, icon: c.icon })),
 ];
 
-
 function PortfolioIndex() {
   const { data: projects = [] } = useQuery(projectsQuery());
   const [active, setActive] = useState<string>("all");
@@ -51,7 +50,14 @@ function PortfolioIndex() {
 
         <div className="sticky top-16 z-30 -mx-6 px-6 py-4 mb-10 bg-white/85 backdrop-blur border-b border-border">
           <div className="flex flex-wrap items-center gap-4">
-            <CategoryDropdown value={active} onChange={setActive} />
+            <div className="w-full sm:w-auto sm:min-w-[280px]">
+              <CategorySelect
+                value={active}
+                onChange={setActive}
+                options={FILTER_OPTIONS}
+                ariaLabel="Filtrer par catégorie"
+              />
+            </div>
             <span className="ml-auto label-mono" style={{ color: "var(--color-blue-accent)" }}>
               {filtered.length} projet{filtered.length > 1 ? "s" : ""}
             </span>
@@ -62,7 +68,7 @@ function PortfolioIndex() {
           <AnimatePresence mode="popLayout">
             {filtered.map((p) => {
               const cat = categoryMeta(p.category as string);
-              const Icon = ICONS[cat.icon] ?? Grid3X3;
+              const Icon = CATEGORY_ICONS[cat.icon] ?? Grid3X3;
               return (
                 <motion.div
                   key={p.id as string}
@@ -118,104 +124,5 @@ function PortfolioIndex() {
         )}
       </div>
     </div>
-  );
-}
-
-function CategoryDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const current = OPTIONS.find((o) => o.slug === value) ?? OPTIONS[0];
-  const CurrentIcon = ICONS[current.icon] ?? Grid3X3;
-
-  useEffect(() => {
-    function onClick(e: MouseEvent) {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, []);
-
-  return (
-    <>
-      {/* Mobile: native select */}
-      <div className="sm:hidden w-full">
-        <div className="relative">
-          <CurrentIcon className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" size={18} />
-          <select
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full appearance-none pl-10 pr-10 py-2.5 rounded-full text-sm border bg-white"
-            style={{ borderColor: "#3B6FCC", color: "var(--color-charcoal)" }}
-            aria-label="Filtrer par catégorie"
-          >
-            {OPTIONS.map((o) => (
-              <option key={o.slug} value={o.slug}>{o.label}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" size={16} />
-        </div>
-      </div>
-
-      {/* Desktop: custom dropdown */}
-      <div ref={wrapRef} className="hidden sm:block relative">
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full text-sm bg-white border transition-all hover:bg-[#EEF2FF]"
-          style={{ borderColor: "#3B6FCC", color: "var(--color-charcoal)" }}
-        >
-          <CurrentIcon size={18} style={{ color: "#3B6FCC" }} />
-          <span className="label-mono">{current.label}</span>
-          <ChevronDown size={16} className="transition-transform" style={{ transform: open ? "rotate(180deg)" : "none" }} />
-        </button>
-
-        <AnimatePresence>
-          {open && (
-            <motion.ul
-              role="listbox"
-              initial={{ opacity: 0, y: -6, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.98 }}
-              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute z-40 mt-2 left-0 min-w-[280px] py-2 rounded-2xl bg-white border shadow-xl overflow-hidden"
-              style={{ borderColor: "#3B6FCC" }}
-            >
-              {OPTIONS.map((o) => {
-                const Icon = ICONS[o.icon] ?? Grid3X3;
-                const isActive = o.slug === value;
-                return (
-                  <li key={o.slug}>
-                    <button
-                      type="button"
-                      onClick={() => { onChange(o.slug); setOpen(false); }}
-                      role="option"
-                      aria-selected={isActive}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors hover:bg-[#EEF2FF]"
-                      style={{
-                        background: isActive ? "#3B6FCC" : "transparent",
-                        color: isActive ? "#fff" : "var(--color-charcoal)",
-                      }}
-                    >
-                      <Icon size={16} />
-                      <span className="flex-1">{o.label}</span>
-                      {isActive && <Check size={14} />}
-                    </button>
-                  </li>
-                );
-              })}
-            </motion.ul>
-          )}
-        </AnimatePresence>
-      </div>
-    </>
   );
 }
