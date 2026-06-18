@@ -22,15 +22,17 @@ export function Navbar() {
 
   useEffect(() => setOpen(false), [path]);
 
-  const textColor = scrolled ? "var(--color-charcoal)" : "#FFFFFF";
+  const isHome = path === "/";
+  const effectiveScrolled = !isHome || scrolled;
+  const textColor = effectiveScrolled ? "var(--color-charcoal)" : "#FFFFFF";
 
   return (
     <header
       className="fixed inset-x-0 top-0 z-50 transition-all duration-300"
       style={{
-        backgroundColor: scrolled ? "rgba(255,255,255,0.85)" : "transparent",
-        backdropFilter: scrolled ? "saturate(140%) blur(14px)" : "none",
-        borderBottom: scrolled ? "1px solid var(--color-border)" : "1px solid transparent",
+        backgroundColor: effectiveScrolled ? "rgba(255,255,255,0.85)" : "transparent",
+        backdropFilter: effectiveScrolled ? "saturate(140%) blur(14px)" : "none",
+        borderBottom: effectiveScrolled ? "1px solid var(--color-border)" : "1px solid transparent",
       }}
     >
       <div className="container-x flex h-16 items-center justify-between">
