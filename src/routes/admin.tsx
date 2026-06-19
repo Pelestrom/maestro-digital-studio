@@ -341,55 +341,116 @@ function AdminPage() {
                 Aucun message pour le moment.
               </p>
             )}
-            {messages.map((m) => (
-              <article
-                key={m.id}
-                className={`rounded-xl border p-5 transition ${m.is_read ? "opacity-70" : ""}`}
-                style={{ borderColor: "var(--color-border)" }}
-              >
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="font-display text-lg">{m.name}</h2>
-                      {!m.is_read && (
+            {messages.map((m) => {
+              const waDigits = (m.whatsapp ?? "").replace(/\D/g, "");
+              return (
+                <article
+                  key={m.id}
+                  className={`rounded-xl border p-5 transition ${m.status === "archived" ? "opacity-60" : ""}`}
+                  style={{ borderColor: "var(--color-border)" }}
+                >
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="font-display text-lg">{m.name}</h2>
                         <span
                           className="text-[10px] px-2 py-0.5 rounded-full label-mono"
-                          style={{ background: "var(--color-blue-accent)", color: "#fff" }}
+                          style={{
+                            background:
+                              m.status === "new"
+                                ? "var(--color-blue-accent)"
+                                : m.status === "replied"
+                                ? "#16a34a"
+                                : m.status === "in_progress"
+                                ? "#f59e0b"
+                                : m.status === "archived"
+                                ? "#6b7280"
+                                : "#94a3b8",
+                            color: "#fff",
+                          }}
                         >
-                          NOUVEAU
+                          {STATUS_LABELS[m.status].toUpperCase()}
                         </span>
-                      )}
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
+                        <a href={`mailto:${m.email}`} className="hover:underline">{m.email}</a>
+                        {m.whatsapp && (
+                          <span className="inline-flex items-center gap-2">
+                            <a
+                              href={`https://wa.me/${waDigits}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline"
+                              style={{ color: "#16a34a" }}
+                            >
+                              {m.whatsapp}
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => navigator.clipboard.writeText(m.whatsapp!)}
+                              className="text-[10px] underline opacity-70 hover:opacity-100"
+                              title="Copier le numéro"
+                            >
+                              copier
+                            </button>
+                          </span>
+                        )}
+                        {m.project_type && <span>· {m.project_type}</span>}
+                        {m.source_page && <span>· {m.source_page}</span>}
+                      </div>
                     </div>
-                    <a href={`mailto:${m.email}`} className="text-xs text-muted-foreground hover:underline">
-                      {m.email}
-                    </a>
-                    {m.project_type && (
-                      <span className="text-xs text-muted-foreground"> · {m.project_type}</span>
-                    )}
+                    <time className="text-xs text-muted-foreground">
+                      {new Date(m.created_at).toLocaleString("fr-FR")}
+                    </time>
                   </div>
-                  <time className="text-xs text-muted-foreground">
-                    {new Date(m.created_at).toLocaleString("fr-FR")}
-                  </time>
-                </div>
-                <p className="mt-3 text-sm whitespace-pre-wrap">{m.message}</p>
-                <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={() => toggleRead(m)}
-                    className="rounded-full px-3 py-1.5 text-[11px] label-mono border"
-                    style={{ borderColor: "var(--color-border)" }}
-                  >
-                    {m.is_read ? "Marquer non lu" : "Marquer lu"}
-                  </button>
-                  <button
-                    onClick={() => remove(m)}
-                    className="rounded-full px-3 py-1.5 text-[11px] label-mono border text-red-500"
-                    style={{ borderColor: "var(--color-border)" }}
-                  >
-                    Supprimer
-                  </button>
-                </div>
-              </article>
-            ))}
+                  <p className="mt-3 text-sm whitespace-pre-wrap">{m.message}</p>
+                  <div className="mt-4 flex gap-2 flex-wrap items-center">
+                    <select
+                      value={m.status}
+                      onChange={(e) => changeStatus(m, e.target.value as MsgStatus)}
+                      className="rounded-full px-3 py-1.5 text-[11px] label-mono border bg-transparent"
+                      style={{ borderColor: "var(--color-border)" }}
+                    >
+                      {(Object.keys(STATUS_LABELS) as MsgStatus[]).map((s) => (
+                        <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                      ))}
+                    </select>
+                    <a
+                      href={`mailto:${m.email}?subject=${encodeURIComponent("Re: votre message")}`}
+                      className="rounded-full px-3 py-1.5 text-[11px] label-mono border"
+                      style={{ borderColor: "var(--color-border)" }}
+                    >
+                      Répondre par email
+                    </a>
+                    {m.whatsapp && (
+                      <a
+                        href={`https://wa.me/${waDigits}?text=${encodeURIComponent(`Bonjour ${m.name.split(" ")[0]}, merci pour votre message…`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-full px-3 py-1.5 text-[11px] label-mono border"
+                        style={{ borderColor: "var(--color-border)", color: "#16a34a" }}
+                      >
+                        Ouvrir WhatsApp
+                      </a>
+                    )}
+                    <button
+                      onClick={() => toggleRead(m)}
+                      className="rounded-full px-3 py-1.5 text-[11px] label-mono border"
+                      style={{ borderColor: "var(--color-border)" }}
+                    >
+                      {m.is_read ? "Marquer non lu" : "Marquer lu"}
+                    </button>
+                    <button
+                      onClick={() => remove(m)}
+                      className="rounded-full px-3 py-1.5 text-[11px] label-mono border text-red-500 ml-auto"
+                      style={{ borderColor: "var(--color-border)" }}
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
 
