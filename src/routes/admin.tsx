@@ -133,7 +133,7 @@ function AdminPage() {
       console.error(error);
       return;
     }
-    setProjects((data ?? []) as Project[]);
+    setProjects((data ?? []) as unknown as Project[]);
   }
 
   async function handleLogin(e: React.FormEvent) {
