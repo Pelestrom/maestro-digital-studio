@@ -80,7 +80,27 @@ export const adminMarkMessageRead = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("messages")
-      .update({ is_read: data.isRead })
+      .update({ is_read: data.isRead, status: data.isRead ? "read" : "new" } as any)
+      .eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const adminSetMessageStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (data: { id: string; status: "new" | "read" | "in_progress" | "replied" | "archived" }) => data,
+  )
+  .handler(async ({ context, data }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("messages")
+      .update({ status: data.status, is_read: data.status !== "new" } as any)
       .eq("id", data.id);
     if (error) throw error;
     return { ok: true };

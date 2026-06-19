@@ -9,6 +9,7 @@ import {
   adminListMessages,
   adminMarkMessageRead,
   adminDeleteMessage,
+  adminSetMessageStatus,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
+type MsgStatus = "new" | "read" | "in_progress" | "replied" | "archived";
 type Msg = {
   id: string;
   name: string;
@@ -30,6 +32,19 @@ type Msg = {
   message: string;
   is_read: boolean;
   created_at: string;
+  whatsapp: string | null;
+  country_code: string | null;
+  status: MsgStatus;
+  source_page: string | null;
+  ip_address: string | null;
+};
+
+const STATUS_LABELS: Record<MsgStatus, string> = {
+  new: "Nouveau",
+  read: "Lu",
+  in_progress: "En cours",
+  replied: "Répondu",
+  archived: "Archivé",
 };
 
 type Project = {
@@ -89,6 +104,7 @@ function AdminPage() {
   const checkAdmin = useServerFn(isCurrentUserAdmin);
   const listMessages = useServerFn(adminListMessages);
   const markRead = useServerFn(adminMarkMessageRead);
+  const setStatus = useServerFn(adminSetMessageStatus);
   const delMsg = useServerFn(adminDeleteMessage);
   const bootstrap = useServerFn(bootstrapAdmin);
 
@@ -155,6 +171,10 @@ function AdminPage() {
   }
   async function toggleRead(m: Msg) {
     await markRead({ data: { id: m.id, isRead: !m.is_read } });
+    await refresh();
+  }
+  async function changeStatus(m: Msg, status: MsgStatus) {
+    await setStatus({ data: { id: m.id, status } });
     await refresh();
   }
   async function remove(m: Msg) {
