@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import mdLogo from "@/assets/md-logo.png.asset.json";
 
 const NAV = [
   { to: "/", label: "Accueil" },
@@ -117,6 +118,14 @@ export function Footer() {
     <footer style={{ background: "var(--color-beret)", color: "#fff" }}>
       <div className="container-x py-16 grid gap-12 md:grid-cols-3">
         <div>
+          <img
+            src={mdLogo.url}
+            alt="Le Maestro du Digital — Logo MD"
+            width={96}
+            height={96}
+            className="h-24 w-24 object-contain mb-4"
+            loading="lazy"
+          />
           <div className="font-display text-2xl">
             Le Maestro <span style={{ color: "var(--color-blue-accent)" }}>du Digital</span>
           </div>

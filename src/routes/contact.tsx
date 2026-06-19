@@ -4,6 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { submitContact, ContactSchema, type ContactInput } from "@/lib/contact.functions";
 import { CATEGORIES } from "@/lib/queries";
 import { CategorySelect, type CategoryOption } from "@/components/ui/CategorySelect";
+import { PhoneInput } from "@/components/ui/PhoneInput";
+import { DEFAULT_COUNTRY, findCountryByCode, toE164 } from "@/lib/countries";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -26,27 +28,54 @@ const PROJECT_TYPES: CategoryOption[] = [
   { value: "Autre", label: "Autre", icon: "Grid3X3" },
 ];
 
+type LocalForm = {
+  name: string;
+  email: string;
+  projectType: string;
+  message: string;
+  countryCode: string;
+  localNumber: string;
+};
 
 function ContactPage() {
   const send = useServerFn(submitContact);
-  const [form, setForm] = useState<ContactInput>({ name: "", email: "", projectType: PROJECT_TYPES[0].value, message: "" });
-  const [errors, setErrors] = useState<Partial<Record<keyof ContactInput, string>>>({});
+  const [form, setForm] = useState<LocalForm>({
+    name: "",
+    email: "",
+    projectType: PROJECT_TYPES[0].value,
+    message: "",
+    countryCode: DEFAULT_COUNTRY.code,
+    localNumber: "",
+  });
+  const [errors, setErrors] = useState<Partial<Record<keyof ContactInput | "localNumber", string>>>({});
   const [state, setState] = useState<FormState>("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
-  const onChange = (k: keyof ContactInput, v: string) => {
+  const set = <K extends keyof LocalForm>(k: K, v: LocalForm[K]) => {
     setForm((f) => ({ ...f, [k]: v }));
     setErrors((e) => ({ ...e, [k]: undefined }));
   };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = ContactSchema.safeParse(form);
+    const country = findCountryByCode(form.countryCode);
+    const whatsapp = toE164(country.dial, form.localNumber);
+    const payload: ContactInput = {
+      name: form.name,
+      email: form.email,
+      projectType: form.projectType,
+      message: form.message,
+      whatsapp,
+      countryCode: form.countryCode,
+      sourcePage: typeof window !== "undefined" ? window.location.pathname : undefined,
+    };
+    const parsed = ContactSchema.safeParse(payload);
     if (!parsed.success) {
-      const fieldErrors: Partial<Record<keyof ContactInput, string>> = {};
+      const fieldErrors: any = {};
       for (const issue of parsed.error.issues) {
-        const k = issue.path[0] as keyof ContactInput;
-        if (k && !fieldErrors[k]) fieldErrors[k] = issue.message;
+        const k = issue.path[0] as string;
+        if (k === "whatsapp") fieldErrors.localNumber = issue.message;
+        else if (!fieldErrors[k]) fieldErrors[k] = issue.message;
       }
       setErrors(fieldErrors);
       return;
@@ -56,7 +85,14 @@ function ContactPage() {
     try {
       await send({ data: parsed.data });
       setState("success");
-      setForm({ name: "", email: "", projectType: PROJECT_TYPES[0].value, message: "" });
+      setForm({
+        name: "",
+        email: "",
+        projectType: PROJECT_TYPES[0].value,
+        message: "",
+        countryCode: DEFAULT_COUNTRY.code,
+        localNumber: "",
+      });
     } catch (err: any) {
       console.error(err);
       setState("error");
@@ -66,7 +102,6 @@ function ContactPage() {
 
   return (
     <div className="pt-16 grid lg:grid-cols-5 min-h-screen">
-      {/* Left */}
       <aside
         className="lg:col-span-2 px-6 md:px-12 py-20"
         style={{ background: "#1A1A1A", color: "#fff" }}
@@ -104,7 +139,6 @@ function ContactPage() {
         </div>
       </aside>
 
-      {/* Right */}
       <section className="lg:col-span-3 px-6 md:px-12 py-20 bg-white">
         {state === "success" ? (
           <div className="max-w-md mx-auto text-center py-24">
@@ -113,7 +147,7 @@ function ContactPage() {
             </div>
             <h2 className="text-h2 mt-6">Message envoyé !</h2>
             <p className="text-muted-foreground mt-3">
-              Merci. Je vous répondrai dans les plus brefs délais (24–48h).
+              Merci. Un email de confirmation vient de vous être envoyé. Je vous répondrai sous 24-48h.
             </p>
             <button
               onClick={() => setState("idle")}
@@ -128,7 +162,7 @@ function ContactPage() {
               <input
                 type="text"
                 value={form.name}
-                onChange={(e) => onChange("name", e.target.value)}
+                onChange={(e) => set("name", e.target.value)}
                 className={inputCls}
                 autoComplete="name"
               />
@@ -137,16 +171,28 @@ function ContactPage() {
               <input
                 type="email"
                 value={form.email}
-                onChange={(e) => onChange("email", e.target.value)}
+                onChange={(e) => set("email", e.target.value)}
                 className={inputCls}
                 autoComplete="email"
               />
             </Field>
+
+            <Field label="Numéro WhatsApp" error={errors.localNumber}>
+              <PhoneInput
+                countryCode={form.countryCode}
+                localNumber={form.localNumber}
+                onChange={({ countryCode, localNumber }) => {
+                  setForm((f) => ({ ...f, countryCode, localNumber }));
+                  setErrors((e) => ({ ...e, localNumber: undefined }));
+                }}
+              />
+            </Field>
+
             <Field label="Type de projet" error={errors.projectType}>
               <div className="mt-2">
                 <CategorySelect
                   value={form.projectType}
-                  onChange={(v) => onChange("projectType", v)}
+                  onChange={(v) => set("projectType", v)}
                   options={PROJECT_TYPES}
                   ariaLabel="Type de projet"
                 />
@@ -156,7 +202,7 @@ function ContactPage() {
             <Field label="Message" error={errors.message}>
               <textarea
                 value={form.message}
-                onChange={(e) => onChange("message", e.target.value)}
+                onChange={(e) => set("message", e.target.value)}
                 rows={6}
                 className={inputCls + " min-h-[160px] resize-y"}
               />
