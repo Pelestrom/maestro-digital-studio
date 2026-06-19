@@ -100,31 +100,46 @@ export type Database = {
       }
       messages: {
         Row: {
+          country_code: string | null
           created_at: string
           email: string
           id: string
+          ip_address: string | null
           is_read: boolean
           message: string
           name: string
           project_type: string | null
+          source_page: string | null
+          status: Database["public"]["Enums"]["message_status"]
+          whatsapp: string | null
         }
         Insert: {
+          country_code?: string | null
           created_at?: string
           email: string
           id?: string
+          ip_address?: string | null
           is_read?: boolean
           message: string
           name: string
           project_type?: string | null
+          source_page?: string | null
+          status?: Database["public"]["Enums"]["message_status"]
+          whatsapp?: string | null
         }
         Update: {
+          country_code?: string | null
           created_at?: string
           email?: string
           id?: string
+          ip_address?: string | null
           is_read?: boolean
           message?: string
           name?: string
           project_type?: string | null
+          source_page?: string | null
+          status?: Database["public"]["Enums"]["message_status"]
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -329,6 +344,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      message_status: "new" | "read" | "in_progress" | "replied" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -457,6 +473,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      message_status: ["new", "read", "in_progress", "replied", "archived"],
     },
   },
 } as const
