@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { CATEGORIES } from "@/lib/queries";
 import {
   bootstrapAdmin,
   isCurrentUserAdmin,
@@ -31,6 +32,48 @@ type Msg = {
   created_at: string;
 };
 
+type Project = {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  description: string | null;
+  cover_image: string | null;
+  gallery_images: string[];
+  client: string | null;
+  year: number | null;
+  tools: string[];
+  tags: string[];
+  is_published: boolean;
+  is_featured: boolean;
+  sort_order: number;
+};
+
+const EMPTY_PROJECT: Omit<Project, "id"> = {
+  title: "",
+  slug: "",
+  category: CATEGORIES[0].slug,
+  description: "",
+  cover_image: "",
+  gallery_images: [],
+  client: "",
+  year: new Date().getFullYear(),
+  tools: [],
+  tags: [],
+  is_published: true,
+  is_featured: false,
+  sort_order: 0,
+};
+
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function AdminPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +81,10 @@ function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<"messages" | "projects">("projects");
   const [messages, setMessages] = useState<Msg[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [editing, setEditing] = useState<Project | (Omit<Project, "id"> & { id?: string }) | null>(null);
 
   const checkAdmin = useServerFn(isCurrentUserAdmin);
   const listMessages = useServerFn(adminListMessages);
@@ -46,23 +92,21 @@ function AdminPage() {
   const delMsg = useServerFn(adminDeleteMessage);
   const bootstrap = useServerFn(bootstrapAdmin);
 
-  // Bootstrap the admin account once (idempotent)
   useEffect(() => {
     bootstrap().catch((e) => console.error("bootstrap admin failed", e));
   }, [bootstrap]);
 
-  // Track session
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(!!data.session));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(!!s));
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // When signed in, check admin & load messages
   useEffect(() => {
     if (!session) {
       setIsAdmin(false);
       setMessages([]);
+      setProjects([]);
       return;
     }
     (async () => {
@@ -72,12 +116,25 @@ function AdminPage() {
         if (isAdmin) {
           const msgs = (await listMessages()) as Msg[];
           setMessages(msgs);
+          await refreshProjects();
         }
       } catch (e) {
         console.error(e);
       }
     })();
   }, [session, checkAdmin, listMessages]);
+
+  async function refreshProjects() {
+    const { data, error } = await supabase
+      .from("projects" as any)
+      .select("*")
+      .order("sort_order", { ascending: true });
+    if (error) {
+      console.error(error);
+      return;
+    }
+    setProjects((data ?? []) as unknown as Project[]);
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -96,19 +153,60 @@ function AdminPage() {
     const msgs = (await listMessages()) as Msg[];
     setMessages(msgs);
   }
-
   async function toggleRead(m: Msg) {
     await markRead({ data: { id: m.id, isRead: !m.is_read } });
     await refresh();
   }
-
   async function remove(m: Msg) {
     if (!confirm("Supprimer ce message ?")) return;
     await delMsg({ data: { id: m.id } });
     await refresh();
   }
 
-  // Not signed in → login form
+  // -------- Projects CRUD (uses RLS — admin is authenticated) --------
+  async function saveProject() {
+    if (!editing) return;
+    const slug = editing.slug?.trim() || slugify(editing.title);
+    const payload: any = {
+      title: editing.title,
+      slug,
+      category: editing.category,
+      description: editing.description || null,
+      cover_image: editing.cover_image || null,
+      gallery_images: editing.gallery_images || [],
+      client: editing.client || null,
+      year: editing.year ? Number(editing.year) : null,
+      tools: editing.tools || [],
+      tags: editing.tags || [],
+      is_published: editing.is_published,
+      is_featured: editing.is_featured,
+      sort_order: Number(editing.sort_order) || 0,
+    };
+    let res;
+    if ("id" in editing && editing.id) {
+      res = await supabase.from("projects" as any).update(payload).eq("id", editing.id);
+    } else {
+      res = await supabase.from("projects" as any).insert(payload);
+    }
+    if (res.error) {
+      alert("Erreur : " + res.error.message);
+      return;
+    }
+    setEditing(null);
+    await refreshProjects();
+  }
+
+  async function deleteProject(p: Project) {
+    if (!confirm(`Supprimer "${p.title}" ?`)) return;
+    const { error } = await supabase.from("projects" as any).delete().eq("id", p.id);
+    if (error) {
+      alert("Erreur : " + error.message);
+      return;
+    }
+    await refreshProjects();
+  }
+
+  // -------- Render --------
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 pt-24 pb-16 bg-background">
@@ -159,7 +257,6 @@ function AdminPage() {
     );
   }
 
-  // Signed in but not admin
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 pt-24 pb-16 bg-background">
@@ -180,90 +277,402 @@ function AdminPage() {
     );
   }
 
-  // Dashboard
   const unread = messages.filter((m) => !m.is_read).length;
+
   return (
     <div className="min-h-screen pt-28 pb-16 px-4 md:px-8 bg-background">
       <div className="max-w-5xl mx-auto">
-        <header className="flex items-center justify-between mb-8">
+        <header className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div>
             <div className="label-mono text-xs" style={{ color: "var(--color-blue-accent)" }}>
               Admin
             </div>
-            <h1 className="font-display text-4xl mt-1">Messages</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {messages.length} message{messages.length > 1 ? "s" : ""} · {unread} non lu{unread > 1 ? "s" : ""}
-            </p>
+            <h1 className="font-display text-4xl mt-1">Dashboard</h1>
           </div>
-          <button
-            onClick={handleLogout}
-            className="rounded-full px-4 py-2 text-xs label-mono border"
-            style={{ borderColor: "var(--color-border)" }}
-          >
-            Se déconnecter
-          </button>
-        </header>
-
-        <div className="space-y-3">
-          {messages.length === 0 && (
-            <p className="text-sm text-muted-foreground py-12 text-center">
-              Aucun message pour le moment.
-            </p>
-          )}
-          {messages.map((m) => (
-            <article
-              key={m.id}
-              className={`rounded-xl border p-5 transition ${m.is_read ? "opacity-70" : ""}`}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setTab("projects")}
+              className={`rounded-full px-4 py-2 text-xs label-mono border ${tab === "projects" ? "bg-foreground text-background" : ""}`}
               style={{ borderColor: "var(--color-border)" }}
             >
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-display text-lg">{m.name}</h2>
-                    {!m.is_read && (
-                      <span
-                        className="text-[10px] px-2 py-0.5 rounded-full label-mono"
-                        style={{ background: "var(--color-blue-accent)", color: "#fff" }}
-                      >
-                        NOUVEAU
-                      </span>
+              Projets ({projects.length})
+            </button>
+            <button
+              onClick={() => setTab("messages")}
+              className={`rounded-full px-4 py-2 text-xs label-mono border ${tab === "messages" ? "bg-foreground text-background" : ""}`}
+              style={{ borderColor: "var(--color-border)" }}
+            >
+              Messages ({messages.length}{unread ? ` · ${unread} nouveau` : ""})
+            </button>
+            <button
+              onClick={handleLogout}
+              className="rounded-full px-4 py-2 text-xs label-mono border"
+              style={{ borderColor: "var(--color-border)" }}
+            >
+              Se déconnecter
+            </button>
+          </div>
+        </header>
+
+        {tab === "messages" && (
+          <div className="space-y-3">
+            {messages.length === 0 && (
+              <p className="text-sm text-muted-foreground py-12 text-center">
+                Aucun message pour le moment.
+              </p>
+            )}
+            {messages.map((m) => (
+              <article
+                key={m.id}
+                className={`rounded-xl border p-5 transition ${m.is_read ? "opacity-70" : ""}`}
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="font-display text-lg">{m.name}</h2>
+                      {!m.is_read && (
+                        <span
+                          className="text-[10px] px-2 py-0.5 rounded-full label-mono"
+                          style={{ background: "var(--color-blue-accent)", color: "#fff" }}
+                        >
+                          NOUVEAU
+                        </span>
+                      )}
+                    </div>
+                    <a href={`mailto:${m.email}`} className="text-xs text-muted-foreground hover:underline">
+                      {m.email}
+                    </a>
+                    {m.project_type && (
+                      <span className="text-xs text-muted-foreground"> · {m.project_type}</span>
                     )}
                   </div>
-                  <a
-                    href={`mailto:${m.email}`}
-                    className="text-xs text-muted-foreground hover:underline"
-                  >
-                    {m.email}
-                  </a>
-                  {m.project_type && (
-                    <span className="text-xs text-muted-foreground"> · {m.project_type}</span>
-                  )}
+                  <time className="text-xs text-muted-foreground">
+                    {new Date(m.created_at).toLocaleString("fr-FR")}
+                  </time>
                 </div>
-                <time className="text-xs text-muted-foreground">
-                  {new Date(m.created_at).toLocaleString("fr-FR")}
-                </time>
-              </div>
-              <p className="mt-3 text-sm whitespace-pre-wrap">{m.message}</p>
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() => toggleRead(m)}
-                  className="rounded-full px-3 py-1.5 text-[11px] label-mono border"
-                  style={{ borderColor: "var(--color-border)" }}
-                >
-                  {m.is_read ? "Marquer non lu" : "Marquer lu"}
-                </button>
-                <button
-                  onClick={() => remove(m)}
-                  className="rounded-full px-3 py-1.5 text-[11px] label-mono border text-red-500"
-                  style={{ borderColor: "var(--color-border)" }}
-                >
-                  Supprimer
-                </button>
-              </div>
-            </article>
-          ))}
+                <p className="mt-3 text-sm whitespace-pre-wrap">{m.message}</p>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={() => toggleRead(m)}
+                    className="rounded-full px-3 py-1.5 text-[11px] label-mono border"
+                    style={{ borderColor: "var(--color-border)" }}
+                  >
+                    {m.is_read ? "Marquer non lu" : "Marquer lu"}
+                  </button>
+                  <button
+                    onClick={() => remove(m)}
+                    className="rounded-full px-3 py-1.5 text-[11px] label-mono border text-red-500"
+                    style={{ borderColor: "var(--color-border)" }}
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {tab === "projects" && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-muted-foreground">
+                Gérez les projets affichés sur le portfolio public.
+              </p>
+              <button
+                onClick={() => setEditing({ ...EMPTY_PROJECT })}
+                className="rounded-full px-4 py-2 text-xs label-mono"
+                style={{ background: "var(--color-blue-accent)", color: "#fff" }}
+              >
+                + Nouveau projet
+              </button>
+            </div>
+
+            {projects.length === 0 && (
+              <p className="text-sm text-muted-foreground py-12 text-center border rounded-xl"
+                 style={{ borderColor: "var(--color-border)" }}>
+                Aucun projet. Cliquez sur « Nouveau projet » pour en ajouter.
+              </p>
+            )}
+
+            <div className="grid gap-3">
+              {projects.map((p) => {
+                const cat = CATEGORIES.find((c) => c.slug === p.category);
+                return (
+                  <article
+                    key={p.id}
+                    className="rounded-xl border p-4 flex items-center gap-4"
+                    style={{ borderColor: "var(--color-border)" }}
+                  >
+                    <div
+                      className="h-16 w-16 rounded-lg overflow-hidden flex-shrink-0 bg-muted"
+                      style={{ background: p.cover_image ? undefined : cat?.color }}
+                    >
+                      {p.cover_image && (
+                        <img src={p.cover_image} alt="" className="h-full w-full object-cover" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-display text-lg truncate">{p.title}</h3>
+                        {!p.is_published && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full label-mono border"
+                                style={{ borderColor: "var(--color-border)" }}>
+                            BROUILLON
+                          </span>
+                        )}
+                        {p.is_featured && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full label-mono"
+                                style={{ background: "var(--color-blue-accent)", color: "#fff" }}>
+                            EN VEDETTE
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {cat?.emoji} {cat?.label} · /{p.slug}
+                        {p.client ? ` · ${p.client}` : ""}
+                        {p.year ? ` · ${p.year}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => setEditing(p)}
+                        className="rounded-full px-3 py-1.5 text-[11px] label-mono border"
+                        style={{ borderColor: "var(--color-border)" }}
+                      >
+                        Éditer
+                      </button>
+                      <button
+                        onClick={() => deleteProject(p)}
+                        className="rounded-full px-3 py-1.5 text-[11px] label-mono border text-red-500"
+                        style={{ borderColor: "var(--color-border)" }}
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {editing && (
+        <ProjectEditor
+          value={editing}
+          onChange={setEditing}
+          onSave={saveProject}
+          onCancel={() => setEditing(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function ProjectEditor({
+  value,
+  onChange,
+  onSave,
+  onCancel,
+}: {
+  value: any;
+  onChange: (v: any) => void;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
+  const set = (patch: any) => onChange({ ...value, ...patch });
+  const isNew = !value.id;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+      style={{ background: "rgba(0,0,0,0.55)" }}
+      onClick={onCancel}
+    >
+      <div
+        className="bg-background rounded-2xl border w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto"
+        style={{ borderColor: "var(--color-border)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6 border-b sticky top-0 bg-background z-10"
+             style={{ borderColor: "var(--color-border)" }}>
+          <h2 className="font-display text-2xl">
+            {isNew ? "Nouveau projet" : "Éditer le projet"}
+          </h2>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <Field label="Titre *">
+            <input
+              required
+              value={value.title}
+              onChange={(e) => set({ title: e.target.value })}
+              className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
+              style={{ borderColor: "var(--color-border)" }}
+            />
+          </Field>
+          <Field label="Slug (URL)" hint="Laisser vide pour générer depuis le titre">
+            <input
+              value={value.slug}
+              onChange={(e) => set({ slug: e.target.value })}
+              placeholder={slugify(value.title || "")}
+              className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent font-mono"
+              style={{ borderColor: "var(--color-border)" }}
+            />
+          </Field>
+          <Field label="Catégorie *">
+            <select
+              value={value.category}
+              onChange={(e) => set({ category: e.target.value })}
+              className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
+              style={{ borderColor: "var(--color-border)" }}
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c.slug} value={c.slug}>{c.emoji} {c.label}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Description">
+            <textarea
+              rows={4}
+              value={value.description ?? ""}
+              onChange={(e) => set({ description: e.target.value })}
+              className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
+              style={{ borderColor: "var(--color-border)" }}
+            />
+          </Field>
+          <Field label="Image de couverture (URL)">
+            <input
+              value={value.cover_image ?? ""}
+              onChange={(e) => set({ cover_image: e.target.value })}
+              placeholder="https://…"
+              className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
+              style={{ borderColor: "var(--color-border)" }}
+            />
+            {value.cover_image && (
+              <img src={value.cover_image} alt="" className="mt-2 max-h-40 rounded-lg" />
+            )}
+          </Field>
+          <Field label="Galerie (une URL par ligne)">
+            <textarea
+              rows={3}
+              value={(value.gallery_images || []).join("\n")}
+              onChange={(e) =>
+                set({
+                  gallery_images: e.target.value
+                    .split("\n")
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                })
+              }
+              className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent font-mono"
+              style={{ borderColor: "var(--color-border)" }}
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Client">
+              <input
+                value={value.client ?? ""}
+                onChange={(e) => set({ client: e.target.value })}
+                className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
+                style={{ borderColor: "var(--color-border)" }}
+              />
+            </Field>
+            <Field label="Année">
+              <input
+                type="number"
+                value={value.year ?? ""}
+                onChange={(e) => set({ year: e.target.value ? Number(e.target.value) : null })}
+                className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
+                style={{ borderColor: "var(--color-border)" }}
+              />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Outils (séparés par virgule)">
+              <input
+                value={(value.tools || []).join(", ")}
+                onChange={(e) =>
+                  set({
+                    tools: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
+                  })
+                }
+                className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
+                style={{ borderColor: "var(--color-border)" }}
+              />
+            </Field>
+            <Field label="Tags (séparés par virgule)">
+              <input
+                value={(value.tags || []).join(", ")}
+                onChange={(e) =>
+                  set({
+                    tags: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
+                  })
+                }
+                className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
+                style={{ borderColor: "var(--color-border)" }}
+              />
+            </Field>
+          </div>
+          <div className="grid grid-cols-3 gap-4 items-center">
+            <Field label="Ordre de tri">
+              <input
+                type="number"
+                value={value.sort_order ?? 0}
+                onChange={(e) => set({ sort_order: Number(e.target.value) })}
+                className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
+                style={{ borderColor: "var(--color-border)" }}
+              />
+            </Field>
+            <label className="flex items-center gap-2 text-sm pt-5">
+              <input
+                type="checkbox"
+                checked={value.is_published}
+                onChange={(e) => set({ is_published: e.target.checked })}
+              />
+              Publié
+            </label>
+            <label className="flex items-center gap-2 text-sm pt-5">
+              <input
+                type="checkbox"
+                checked={value.is_featured}
+                onChange={(e) => set({ is_featured: e.target.checked })}
+              />
+              En vedette
+            </label>
+          </div>
+        </div>
+
+        <div className="p-6 border-t flex justify-end gap-2 sticky bottom-0 bg-background"
+             style={{ borderColor: "var(--color-border)" }}>
+          <button
+            onClick={onCancel}
+            className="rounded-full px-5 py-2 text-xs label-mono border"
+            style={{ borderColor: "var(--color-border)" }}
+          >
+            Annuler
+          </button>
+          <button
+            onClick={onSave}
+            disabled={!value.title}
+            className="rounded-full px-5 py-2 text-xs label-mono disabled:opacity-50"
+            style={{ background: "var(--color-blue-accent)", color: "#fff" }}
+          >
+            Enregistrer
+          </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1">
+      <label className="label-mono text-xs">{label}</label>
+      {children}
+      {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
     </div>
   );
 }
