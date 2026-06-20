@@ -55,6 +55,7 @@ type Project = {
   category: string;
   description: string | null;
   cover_image: string | null;
+  cover_position: string;
   gallery_images: string[];
   client: string | null;
   year: number | null;
@@ -71,6 +72,7 @@ const EMPTY_PROJECT: Omit<Project, "id"> = {
   category: CATEGORIES[0].slug,
   description: "",
   cover_image: "",
+  cover_position: "50% 50%",
   gallery_images: [],
   client: "",
   year: new Date().getFullYear(),
