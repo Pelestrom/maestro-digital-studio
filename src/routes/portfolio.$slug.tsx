@@ -120,7 +120,13 @@ function ProjectPage() {
       {gallery.length > 0 && (
         <section className="container-x pb-24 space-y-6">
           {gallery.map((url, i) => (
-            <img key={i} src={url} alt={`${project.title} — visuel ${i + 1}`} className="w-full rounded-lg" loading="lazy" />
+            <img
+              key={i}
+              src={url}
+              alt={`${project.title} — visuel ${i + 1}`}
+              className="w-full max-h-[70vh] object-contain rounded-lg mx-auto bg-black/5"
+              loading="lazy"
+            />
           ))}
         </section>
       )}
