@@ -196,6 +196,7 @@ function AdminPage() {
       category: editing.category,
       description: editing.description || null,
       cover_image: editing.cover_image || null,
+      cover_position: editing.cover_position || "50% 50%",
       gallery_images: editing.gallery_images || [],
       client: editing.client || null,
       year: editing.year ? Number(editing.year) : null,
