@@ -231,13 +231,6 @@ export function CoverUploader({
           </button>
         </div>
       )}
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="ou collez une URL externe (optionnel)"
-        className="w-full rounded-lg border px-3 py-2 text-xs bg-transparent"
-        style={{ borderColor: "var(--color-border)" }}
-      />
     </div>
   );
 }
