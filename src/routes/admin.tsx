@@ -634,6 +634,15 @@ function ProjectEditor({
               slugHint={value.slug || slugify(value.title || "")}
             />
           </Field>
+          {value.cover_image && (
+            <Field label="Cadrage de la couverture (zone visible)">
+              <CoverPositionEditor
+                src={value.cover_image}
+                value={value.cover_position || "50% 50%"}
+                onChange={(pos) => set({ cover_position: pos })}
+              />
+            </Field>
+          )}
           <Field label="Galerie">
             <GalleryUploader
               value={value.gallery_images || []}
