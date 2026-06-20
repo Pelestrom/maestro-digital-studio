@@ -120,15 +120,25 @@ async function uploadOne(
     .upload(path, uploadBlob, { contentType, upsert: false });
   if (error) throw new Error(error.message);
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  // Bucket is private (workspace blocks public buckets) — use a long-lived signed URL.
+  const TEN_YEARS = 60 * 60 * 24 * 365 * 10;
+  const { data, error: signErr } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrl(path, TEN_YEARS);
+  if (signErr || !data?.signedUrl) throw new Error(signErr?.message ?? "Impossible de générer l'URL");
+  return data.signedUrl;
 }
 
 function extractPath(url: string): string | null {
-  const marker = `/storage/v1/object/public/${BUCKET}/`;
-  const i = url.indexOf(marker);
-  if (i === -1) return null;
-  return url.slice(i + marker.length);
+  for (const marker of [`/storage/v1/object/sign/${BUCKET}/`, `/storage/v1/object/public/${BUCKET}/`]) {
+    const i = url.indexOf(marker);
+    if (i !== -1) {
+      const rest = url.slice(i + marker.length);
+      const q = rest.indexOf("?");
+      return q === -1 ? rest : rest.slice(0, q);
+    }
+  }
+  return null;
 }
 
 async function removeFromStorage(url: string) {
@@ -221,13 +231,6 @@ export function CoverUploader({
           </button>
         </div>
       )}
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="ou collez une URL externe (optionnel)"
-        className="w-full rounded-lg border px-3 py-2 text-xs bg-transparent"
-        style={{ borderColor: "var(--color-border)" }}
-      />
     </div>
   );
 }
