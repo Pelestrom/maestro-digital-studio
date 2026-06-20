@@ -148,7 +148,7 @@ function ProjectPage() {
                     className="group relative block overflow-hidden rounded-lg aspect-[4/5]"
                     style={{ background: `linear-gradient(160deg, ${c.color}, var(--color-beret))` }}
                   >
-                    {p.cover_image && <img src={p.cover_image as string} alt={p.title as string} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}
+                    {p.cover_image && <img src={p.cover_image as string} alt={p.title as string} loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: (p.cover_position as string) || "50% 50%" }} />}
                     <div className="absolute inset-x-0 bottom-0 p-4 text-white" style={{ background: "linear-gradient(to top, rgba(0,0,0,.7), transparent)" }}>
                       <div className="label-mono opacity-80">{c.emoji} {c.label}</div>
                       <div className="font-display text-lg mt-1">{p.title as string}</div>
