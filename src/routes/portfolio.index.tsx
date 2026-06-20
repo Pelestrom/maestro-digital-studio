@@ -180,6 +180,7 @@ function PortfolioIndex() {
                             alt={p.title as string}
                             loading="lazy"
                             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            style={{ objectPosition: (p.cover_position as string) || "50% 50%" }}
                           />
                         )}
                         <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: cat.color }} />
