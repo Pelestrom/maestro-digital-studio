@@ -59,7 +59,7 @@ function ProjectPage() {
     <article>
       {/* Hero */}
       <header
-        className="relative min-h-[80vh] flex items-end overflow-hidden"
+        className="relative min-h-[48vh] md:min-h-[55vh] max-h-[600px] flex items-end overflow-hidden"
         style={{ background: `linear-gradient(160deg, ${cat.color}, var(--color-beret))` }}
       >
         {project.cover_image && (
@@ -67,15 +67,16 @@ function ProjectPage() {
             src={project.cover_image as string}
             alt={project.title as string}
             className="absolute inset-0 h-full w-full object-cover opacity-80"
+            style={{ objectPosition: (project.cover_position as string) || "50% 50%" }}
           />
         )}
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent 60%)" }} />
-        <div className="container-x relative pb-16 pt-32 text-white">
+        <div className="container-x relative pb-10 pt-28 text-white">
           <Link to="/portfolio" className="label-mono opacity-80 hover:opacity-100">
             ← Retour au portfolio
           </Link>
-          <div className="label-mono mt-6" style={{ color: "#fff" }}>{cat.emoji} {cat.label}</div>
-          <h1 className="text-hero mt-3" style={{ color: "#fff" }}>{project.title as string}</h1>
+          <div className="label-mono mt-4" style={{ color: "#fff" }}>{cat.emoji} {cat.label}</div>
+          <h1 className="text-h1 mt-2" style={{ color: "#fff" }}>{project.title as string}</h1>
         </div>
       </header>
 
@@ -119,7 +120,13 @@ function ProjectPage() {
       {gallery.length > 0 && (
         <section className="container-x pb-24 space-y-6">
           {gallery.map((url, i) => (
-            <img key={i} src={url} alt={`${project.title} — visuel ${i + 1}`} className="w-full rounded-lg" loading="lazy" />
+            <img
+              key={i}
+              src={url}
+              alt={`${project.title} — visuel ${i + 1}`}
+              className="w-full max-h-[70vh] object-contain rounded-lg mx-auto bg-black/5"
+              loading="lazy"
+            />
           ))}
         </section>
       )}
@@ -141,7 +148,7 @@ function ProjectPage() {
                     className="group relative block overflow-hidden rounded-lg aspect-[4/5]"
                     style={{ background: `linear-gradient(160deg, ${c.color}, var(--color-beret))` }}
                   >
-                    {p.cover_image && <img src={p.cover_image as string} alt={p.title as string} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}
+                    {p.cover_image && <img src={p.cover_image as string} alt={p.title as string} loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: (p.cover_position as string) || "50% 50%" }} />}
                     <div className="absolute inset-x-0 bottom-0 p-4 text-white" style={{ background: "linear-gradient(to top, rgba(0,0,0,.7), transparent)" }}>
                       <div className="label-mono opacity-80">{c.emoji} {c.label}</div>
                       <div className="font-display text-lg mt-1">{p.title as string}</div>

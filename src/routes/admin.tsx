@@ -55,6 +55,7 @@ type Project = {
   category: string;
   description: string | null;
   cover_image: string | null;
+  cover_position: string;
   gallery_images: string[];
   client: string | null;
   year: number | null;
@@ -71,6 +72,7 @@ const EMPTY_PROJECT: Omit<Project, "id"> = {
   category: CATEGORIES[0].slug,
   description: "",
   cover_image: "",
+  cover_position: "50% 50%",
   gallery_images: [],
   client: "",
   year: new Date().getFullYear(),
@@ -194,6 +196,7 @@ function AdminPage() {
       category: editing.category,
       description: editing.description || null,
       cover_image: editing.cover_image || null,
+      cover_position: editing.cover_position || "50% 50%",
       gallery_images: editing.gallery_images || [],
       client: editing.client || null,
       year: editing.year ? Number(editing.year) : null,
@@ -631,6 +634,15 @@ function ProjectEditor({
               slugHint={value.slug || slugify(value.title || "")}
             />
           </Field>
+          {value.cover_image && (
+            <Field label="Cadrage de la couverture (zone visible)">
+              <CoverPositionEditor
+                src={value.cover_image}
+                value={value.cover_position || "50% 50%"}
+                onChange={(pos) => set({ cover_position: pos })}
+              />
+            </Field>
+          )}
           <Field label="Galerie">
             <GalleryUploader
               value={value.gallery_images || []}
@@ -744,3 +756,75 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
     </div>
   );
 }
+
+function CoverPositionEditor({
+  src,
+  value,
+  onChange,
+}: {
+  src: string;
+  value: string;
+  onChange: (pos: string) => void;
+}) {
+  const parsed = (() => {
+    const [x, y] = (value || "50% 50%").split(" ").map((s) => parseFloat(s));
+    return { x: isNaN(x) ? 50 : x, y: isNaN(y) ? 50 : y };
+  })();
+
+  const update = (x: number, y: number) =>
+    onChange(`${Math.round(x)}% ${Math.round(y)}%`);
+
+  return (
+    <div className="space-y-3">
+      <div
+        className="relative w-full overflow-hidden rounded-lg border cursor-crosshair"
+        style={{ borderColor: "var(--color-border)", aspectRatio: "16 / 9" }}
+        onClick={(e) => {
+          const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+          const x = ((e.clientX - r.left) / r.width) * 100;
+          const y = ((e.clientY - r.top) / r.height) * 100;
+          update(Math.max(0, Math.min(100, x)), Math.max(0, Math.min(100, y)));
+        }}
+      >
+        <img
+          src={src}
+          alt="Aperçu cadrage"
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: `${parsed.x}% ${parsed.y}%` }}
+        />
+        <div
+          className="absolute w-4 h-4 -ml-2 -mt-2 rounded-full border-2 border-white shadow-lg pointer-events-none"
+          style={{ left: `${parsed.x}%`, top: `${parsed.y}%`, background: "var(--color-blue-accent)" }}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3 text-xs">
+        <label className="space-y-1">
+          <span className="label-mono">Horizontal · {Math.round(parsed.x)}%</span>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={parsed.x}
+            onChange={(e) => update(Number(e.target.value), parsed.y)}
+            className="w-full"
+          />
+        </label>
+        <label className="space-y-1">
+          <span className="label-mono">Vertical · {Math.round(parsed.y)}%</span>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={parsed.y}
+            onChange={(e) => update(parsed.x, Number(e.target.value))}
+            className="w-full"
+          />
+        </label>
+      </div>
+      <p className="text-[11px] text-muted-foreground">
+        Cliquez sur l'image ou utilisez les curseurs pour choisir la zone à afficher.
+      </p>
+    </div>
+  );
+}
+
