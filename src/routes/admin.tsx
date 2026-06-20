@@ -11,6 +11,7 @@ import {
   adminDeleteMessage,
   adminSetMessageStatus,
 } from "@/lib/admin.functions";
+import { CoverUploader, GalleryUploader } from "@/components/admin/MediaUploader";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -623,32 +624,18 @@ function ProjectEditor({
               style={{ borderColor: "var(--color-border)" }}
             />
           </Field>
-          <Field label="Image de couverture (URL)">
-            <input
+          <Field label="Image de couverture">
+            <CoverUploader
               value={value.cover_image ?? ""}
-              onChange={(e) => set({ cover_image: e.target.value })}
-              placeholder="https://…"
-              className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent"
-              style={{ borderColor: "var(--color-border)" }}
+              onChange={(url) => set({ cover_image: url })}
+              slugHint={value.slug || slugify(value.title || "")}
             />
-            {value.cover_image && (
-              <img src={value.cover_image} alt="" className="mt-2 max-h-40 rounded-lg" />
-            )}
           </Field>
-          <Field label="Galerie (une URL par ligne)">
-            <textarea
-              rows={3}
-              value={(value.gallery_images || []).join("\n")}
-              onChange={(e) =>
-                set({
-                  gallery_images: e.target.value
-                    .split("\n")
-                    .map((s) => s.trim())
-                    .filter(Boolean),
-                })
-              }
-              className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent font-mono"
-              style={{ borderColor: "var(--color-border)" }}
+          <Field label="Galerie">
+            <GalleryUploader
+              value={value.gallery_images || []}
+              onChange={(urls) => set({ gallery_images: urls })}
+              slugHint={value.slug || slugify(value.title || "")}
             />
           </Field>
           <div className="grid grid-cols-2 gap-4">
