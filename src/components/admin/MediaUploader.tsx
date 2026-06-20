@@ -130,10 +130,15 @@ async function uploadOne(
 }
 
 function extractPath(url: string): string | null {
-  const marker = `/storage/v1/object/public/${BUCKET}/`;
-  const i = url.indexOf(marker);
-  if (i === -1) return null;
-  return url.slice(i + marker.length);
+  for (const marker of [`/storage/v1/object/sign/${BUCKET}/`, `/storage/v1/object/public/${BUCKET}/`]) {
+    const i = url.indexOf(marker);
+    if (i !== -1) {
+      const rest = url.slice(i + marker.length);
+      const q = rest.indexOf("?");
+      return q === -1 ? rest : rest.slice(0, q);
+    }
+  }
+  return null;
 }
 
 async function removeFromStorage(url: string) {
