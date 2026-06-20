@@ -148,6 +148,7 @@ export type Database = {
           category: string
           client: string | null
           cover_image: string | null
+          cover_position: string
           created_at: string
           description: string | null
           gallery_images: Json
@@ -165,6 +166,7 @@ export type Database = {
           category: string
           client?: string | null
           cover_image?: string | null
+          cover_position?: string
           created_at?: string
           description?: string | null
           gallery_images?: Json
@@ -182,6 +184,7 @@ export type Database = {
           category?: string
           client?: string | null
           cover_image?: string | null
+          cover_position?: string
           created_at?: string
           description?: string | null
           gallery_images?: Json

@@ -1,0 +1,1 @@
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS cover_position text NOT NULL DEFAULT '50% 50%';
