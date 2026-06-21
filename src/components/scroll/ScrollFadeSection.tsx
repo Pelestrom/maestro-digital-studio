@@ -7,12 +7,11 @@ if (typeof window !== "undefined") {
 }
 
 /**
- * Parallax Stack — each section glides up slightly slower than the page scroll
- * and gently recedes (subtle scale) so the next section appears to slide over it.
- * No blur, no white overlay, no opacity fade — strictly transform-based for 60fps.
+ * Scroll entrance — sections enter with a marked fade + translateY + scale,
+ * and their direct children stagger in for a premium reveal.
  *
- * - Honors prefers-reduced-motion
- * - Wraps the section in a 3D layer so transforms stay GPU-composited
+ * - expressive easing (expo.out)
+ * - honors prefers-reduced-motion
  */
 export function ScrollFadeSection({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -25,21 +24,45 @@ export function ScrollFadeSection({ children }: { children: ReactNode }) {
     if (!el) return;
 
     const ctx = gsap.context(() => {
+      // Section entrance
       gsap.fromTo(
         el,
-        { yPercent: 0, scale: 1 },
+        { opacity: 0, y: 70, scale: 0.95 },
         {
-          yPercent: -8,
-          scale: 0.985,
-          ease: "none",
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1.1,
+          ease: "expo.out",
           scrollTrigger: {
             trigger: el,
-            start: "top top",
-            end: "bottom top",
-            scrub: 0.5,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
           },
         },
       );
+
+      // Stagger direct children of the first child container
+      const inner = el.firstElementChild as HTMLElement | null;
+      const kids = inner ? Array.from(inner.children) : [];
+      if (kids.length > 1) {
+        gsap.fromTo(
+          kids,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            ease: "expo.out",
+            stagger: 0.12,
+            scrollTrigger: {
+              trigger: el,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          },
+        );
+      }
     }, el);
 
     return () => ctx.revert();
@@ -49,8 +72,7 @@ export function ScrollFadeSection({ children }: { children: ReactNode }) {
     <div
       ref={ref}
       style={{
-        transformOrigin: "center top",
-        willChange: "transform",
+        willChange: "transform, opacity",
         backfaceVisibility: "hidden",
       }}
     >
