@@ -573,18 +573,27 @@ function ProjectEditor({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
       style={{ background: "rgba(0,0,0,0.55)" }}
-      onClick={onCancel}
     >
       <div
-        className="bg-background rounded-2xl border w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto"
+        className="bg-background rounded-2xl border w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto relative"
         style={{ borderColor: "var(--color-border)" }}
-        onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b sticky top-0 bg-background z-10"
+        <div className="p-6 border-b sticky top-0 bg-background z-10 flex items-center justify-between gap-4"
              style={{ borderColor: "var(--color-border)" }}>
           <h2 className="font-display text-2xl">
             {isNew ? "Nouveau projet" : "Éditer le projet"}
           </h2>
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Fermer"
+            className="w-9 h-9 rounded-full border flex items-center justify-center hover:bg-foreground/5 transition-colors flex-shrink-0"
+            style={{ borderColor: "var(--color-border)" }}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M6 6 L18 18 M18 6 L6 18" />
+            </svg>
+          </button>
         </div>
 
         <div className="p-6 space-y-4">
