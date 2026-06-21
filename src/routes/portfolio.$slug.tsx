@@ -85,22 +85,23 @@ function ProjectPage() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-start">
           {/* Left: cover image */}
           <div
-            className="relative w-full rounded-xl overflow-hidden lg:sticky lg:top-36"
+            className="relative w-full rounded-xl overflow-hidden lg:sticky lg:top-36 flex items-center justify-center"
             style={{
-              background: `linear-gradient(160deg, ${cat.color}, var(--color-beret))`,
-              aspectRatio: "4 / 5",
-              maxHeight: "70vh",
+              background: `linear-gradient(160deg, ${cat.color}22, var(--color-grey-soft))`,
+              minHeight: "40vh",
+              maxHeight: "75vh",
             }}
           >
             {project.cover_image && (
               <img
                 src={project.cover_image as string}
                 alt={project.title as string}
-                className="absolute inset-0 h-full w-full object-cover"
+                className="max-h-[75vh] w-full h-auto object-contain"
                 style={{ objectPosition: (project.cover_position as string) || "50% 50%" }}
               />
             )}
           </div>
+
 
           {/* Right: meta + description */}
           <div>
