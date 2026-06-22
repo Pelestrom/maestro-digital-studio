@@ -7,6 +7,7 @@ import {
   toolsQuery,
 } from "@/lib/queries";
 import { useInView } from "@/lib/hooks/useCountUp";
+import { ScrollFadeSection } from "@/components/scroll/ScrollFadeSection";
 import seatedAsset from "@/assets/maestro-seated.png.asset.json";
 
 export const Route = createFileRoute("/about")({
@@ -33,110 +34,122 @@ function AboutPage() {
   return (
     <div className="pt-32">
       {/* Intro */}
-      <section className="container-x grid lg:grid-cols-2 gap-12 pb-24">
-        <div>
-          <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>À propos</div>
-          <h1 className="text-hero mt-4">Le Maestro<br/>du Digital.</h1>
-          <p className="mt-8 text-base text-muted-foreground leading-relaxed max-w-prose">
-            {(about?.biography as string) ??
-              "Designer graphique et directeur artistique, je conçois des identités visuelles sophistiquées pour marques ambitieuses."}
-          </p>
-        </div>
-        <div className="relative aspect-[4/5] rounded-2xl overflow-hidden glow-ring group" style={{ background: "var(--color-grey-soft)" }}>
-          <img
-            src={(about?.profile_photo as string) || seatedAsset.url}
-            alt="Le Maestro du Digital"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.05]"
-          />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
-          <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between text-white">
-            <div>
-              <div className="font-display text-2xl">Le Maestro</div>
-              <div className="label-mono text-white/70">Designer · DA</div>
-            </div>
-            <div className="w-8 h-8 rotate-45 border border-white/60" aria-hidden />
+      <ScrollFadeSection>
+        <section className="container-x grid lg:grid-cols-2 gap-12 pb-24">
+          <div>
+            <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>À propos</div>
+            <h1 className="text-hero mt-4">Le Maestro<br/>du Digital.</h1>
+            <p className="mt-8 text-base text-muted-foreground leading-relaxed max-w-prose">
+              {(about?.biography as string) ??
+                "Designer graphique et directeur artistique, je conçois des identités visuelles sophistiquées pour marques ambitieuses."}
+            </p>
           </div>
-        </div>
-      </section>
+          <div className="relative aspect-[4/5] rounded-2xl overflow-hidden glow-ring group" style={{ background: "var(--color-grey-soft)" }}>
+            <img
+              src={(about?.profile_photo as string) || seatedAsset.url}
+              alt="Le Maestro du Digital"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.05]"
+            />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+            <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between text-white">
+              <div>
+                <div className="font-display text-2xl">Le Maestro</div>
+                <div className="label-mono text-white/70">Designer · DA</div>
+              </div>
+              <div className="w-8 h-8 rotate-45 border border-white/60" aria-hidden />
+            </div>
+          </div>
+        </section>
+      </ScrollFadeSection>
 
       {/* Values */}
-      <section className="pt-16 pb-10" style={{ background: "var(--color-grey-soft)" }}>
-        <div className="container-x grid md:grid-cols-3 gap-8">
-          {[
-            { label: "Précision", text: "Chaque détail compte. Du pixel à la grille typographique." },
-            { label: "Créativité", text: "Une signature visuelle distinctive pour chaque projet." },
-            { label: "Impact", text: "Du design qui sert la stratégie et marque les esprits." },
-          ].map((v) => (
-            <div key={v.label}>
-              <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>{v.label}</div>
-              <p className="mt-3 text-sm" style={{ color: "var(--color-charcoal)" }}>{v.text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Tools */}
-      <section className="pt-16 pb-24 bg-white border-t border-border">
-        <div className="container-x">
-          <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Outils</div>
-          <h2 className="text-h2 mt-4 mb-12">Mes outils</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {tools.map((t) => (
-              <ToolCard key={t.id as string} tool={t} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-      {/* Skills */}
-      {skills.length > 0 && (
-        <section className="container-x py-24">
-          <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Compétences</div>
-          <h2 className="text-h2 mt-4 mb-12">Mes compétences</h2>
-          <div className="grid md:grid-cols-2 gap-x-12 gap-y-6">
-            {skills.map((s) => (
-              <SkillBar key={s.id as string} name={s.name as string} level={s.level as number} />
+      <ScrollFadeSection>
+        <section className="pt-16 pb-10" style={{ background: "var(--color-grey-soft)" }}>
+          <div className="container-x grid md:grid-cols-3 gap-8">
+            {[
+              { label: "Précision", text: "Chaque détail compte. Du pixel à la grille typographique." },
+              { label: "Créativité", text: "Une signature visuelle distinctive pour chaque projet." },
+              { label: "Impact", text: "Du design qui sert la stratégie et marque les esprits." },
+            ].map((v) => (
+              <div key={v.label}>
+                <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>{v.label}</div>
+                <p className="mt-3 text-sm" style={{ color: "var(--color-charcoal)" }}>{v.text}</p>
+              </div>
             ))}
           </div>
         </section>
-      )}
+      </ScrollFadeSection>
 
-      {/* Certifications */}
-      {certs.length > 0 && (
-        <section className="py-20" style={{ background: "var(--color-grey-soft)" }}>
+      {/* Tools */}
+      <ScrollFadeSection>
+        <section className="pt-16 pb-24 bg-white border-t border-border">
           <div className="container-x">
-            <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Certifications</div>
-            <h2 className="text-h2 mt-4 mb-10">Diplômes</h2>
+            <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Outils</div>
+            <h2 className="text-h2 mt-4 mb-12">Mes outils</h2>
             <div className="grid md:grid-cols-3 gap-6">
-              {certs.map((c) => (
-                <div key={c.id as string} className="bg-white border border-border rounded-lg p-6">
-                  <div className="font-display text-lg">{c.name as string}</div>
-                  <div className="label-mono text-muted-foreground mt-2">{c.issuer as string} · {c.year as number}</div>
-                </div>
+              {tools.map((t) => (
+                <ToolCard key={t.id as string} tool={t} />
               ))}
             </div>
           </div>
         </section>
+      </ScrollFadeSection>
+
+
+      {/* Skills */}
+      {skills.length > 0 && (
+        <ScrollFadeSection>
+          <section className="container-x py-24">
+            <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Compétences</div>
+            <h2 className="text-h2 mt-4 mb-12">Mes compétences</h2>
+            <div className="grid md:grid-cols-2 gap-x-12 gap-y-6">
+              {skills.map((s) => (
+                <SkillBar key={s.id as string} name={s.name as string} level={s.level as number} />
+              ))}
+            </div>
+          </section>
+        </ScrollFadeSection>
+      )}
+
+      {/* Certifications */}
+      {certs.length > 0 && (
+        <ScrollFadeSection>
+          <section className="py-20" style={{ background: "var(--color-grey-soft)" }}>
+            <div className="container-x">
+              <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Certifications</div>
+              <h2 className="text-h2 mt-4 mb-10">Diplômes</h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                {certs.map((c) => (
+                  <div key={c.id as string} className="bg-white border border-border rounded-lg p-6">
+                    <div className="font-display text-lg">{c.name as string}</div>
+                    <div className="label-mono text-muted-foreground mt-2">{c.issuer as string} · {c.year as number}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </ScrollFadeSection>
       )}
 
       {/* CTA */}
-      <section className="py-24 text-center" style={{ background: "#1A1A1A", color: "#fff" }}>
-        <div className="container-x">
-          <h2 className="text-h2" style={{ color: "#fff" }}>Travaillons ensemble.</h2>
-          <p className="mt-4 text-white/60 max-w-md mx-auto">
-            Une idée, un projet, une marque à révéler ? Discutons-en.
-          </p>
-          <Link
-            to="/contact"
-            data-cursor="cta"
-            className="inline-flex mt-8 items-center gap-2 rounded-full px-6 py-3 text-sm label-mono"
-            style={{ background: "var(--color-blue-accent)", color: "#fff" }}
-          >
-            Me contacter →
-          </Link>
-        </div>
-      </section>
+      <ScrollFadeSection>
+        <section className="py-24 text-center border-t border-white/10" style={{ background: "#1A1A1A", color: "#fff" }}>
+          <div className="container-x">
+            <h2 className="text-h2" style={{ color: "#fff" }}>Travaillons ensemble.</h2>
+            <p className="mt-4 text-white/60 max-w-md mx-auto">
+              Une idée, un projet, une marque à révéler ? Discutons-en.
+            </p>
+            <Link
+              to="/contact"
+              data-cursor="cta"
+              className="inline-flex mt-8 items-center gap-2 rounded-full px-6 py-3 text-sm label-mono"
+              style={{ background: "var(--color-blue-accent)", color: "#fff" }}
+            >
+              Me contacter →
+            </Link>
+          </div>
+        </section>
+      </ScrollFadeSection>
     </div>
   );
 }

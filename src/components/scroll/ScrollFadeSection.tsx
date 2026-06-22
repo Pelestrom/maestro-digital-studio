@@ -7,11 +7,13 @@ if (typeof window !== "undefined") {
 }
 
 /**
- * Scroll entrance — sections enter with a marked fade + translateY + scale,
- * and their direct children stagger in for a premium reveal.
+ * Premium scroll section with pronounced entry and exit animations.
  *
- * - expressive easing (expo.out)
- * - honors prefers-reduced-motion
+ * Entry: translateY (80px) + fade + scale (0.92 → 1) with easeOutExpo
+ * Exit: subtle scale down (1 → 0.95) + opacity fade when scrolling past
+ * Children: staggered reveal (80-100ms between each)
+ *
+ * Honors prefers-reduced-motion.
  */
 export function ScrollFadeSection({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -24,40 +26,59 @@ export function ScrollFadeSection({ children }: { children: ReactNode }) {
     if (!el) return;
 
     const ctx = gsap.context(() => {
-      // Section entrance
+      // Section entrance animation
       gsap.fromTo(
         el,
-        { opacity: 0, y: 70, scale: 0.95 },
+        { opacity: 0, y: 80, scale: 0.92 },
         {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 1.1,
+          duration: 1.2,
           ease: "expo.out",
           scrollTrigger: {
             trigger: el,
-            start: "top 85%",
+            start: "top 88%",
+            end: "bottom 15%",
             toggleActions: "play none none reverse",
           },
         },
       );
 
-      // Stagger direct children of the first child container
+      // Section exit animation - subtle "closing" effect
+      gsap.fromTo(
+        el,
+        { scale: 1, opacity: 1 },
+        {
+          scale: 0.95,
+          opacity: 0.6,
+          duration: 0.5,
+          ease: "expo.inOut",
+          scrollTrigger: {
+            trigger: el,
+            start: "bottom 20%",
+            end: "bottom -10%",
+            scrub: 0.8,
+          },
+        },
+      );
+
+      // Staggered children reveal
       const inner = el.firstElementChild as HTMLElement | null;
       const kids = inner ? Array.from(inner.children) : [];
       if (kids.length > 1) {
         gsap.fromTo(
           kids,
-          { opacity: 0, y: 40 },
+          { opacity: 0, y: 50 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.9,
+            duration: 1,
             ease: "expo.out",
-            stagger: 0.12,
+            stagger: 0.09,
             scrollTrigger: {
               trigger: el,
-              start: "top 80%",
+              start: "top 82%",
               toggleActions: "play none none reverse",
             },
           },

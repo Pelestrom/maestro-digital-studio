@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { categoryMeta, projectBySlugQuery, projectsQuery } from "@/lib/queries";
 import { ToolBadge } from "@/components/ui/ToolIcon";
+import { ScrollFadeSection } from "@/components/scroll/ScrollFadeSection";
 
 export const Route = createFileRoute("/portfolio/$slug")({
   ssr: false,
@@ -81,111 +82,110 @@ function ProjectPage() {
       </div>
 
       {/* Two-column main section */}
-      <section className="max-w-[1400px] mx-auto px-6 lg:px-10 py-10 lg:py-16">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-start">
-          {/* Left: cover image */}
-          <div
-            className="relative w-full rounded-xl overflow-hidden lg:sticky lg:top-36 flex items-center justify-center"
-            style={{
-              background: `linear-gradient(160deg, ${cat.color}22, var(--color-grey-soft))`,
-              minHeight: "40vh",
-              maxHeight: "75vh",
-            }}
-          >
-            {project.cover_image && (
-              <img
-                src={project.cover_image as string}
-                alt={project.title as string}
-                className="max-h-[75vh] w-full h-auto object-contain"
-                style={{ objectPosition: (project.cover_position as string) || "50% 50%" }}
-              />
-            )}
-          </div>
-
-
-          {/* Right: meta + description */}
-          <div>
-            <h1 className="text-h1 leading-tight" style={{ color: "var(--color-navy, #1B2A4A)" }}>
-              {project.title as string}
-            </h1>
-
-            <div className="mt-8 grid grid-cols-2 gap-6 pb-8 border-b" style={{ borderColor: "var(--color-border)" }}>
-              {project.client && (
-                <div>
-                  <div className="label-mono text-xs text-muted-foreground">Client</div>
-                  <div className="mt-1 text-sm" style={{ color: "var(--color-charcoal)" }}>{project.client as string}</div>
-                </div>
-              )}
-              {project.year && (
-                <div>
-                  <div className="label-mono text-xs text-muted-foreground">Année</div>
-                  <div className="mt-1 text-sm" style={{ color: "var(--color-charcoal)" }}>{project.year as number}</div>
-                </div>
+      <ScrollFadeSection>
+        <section className="max-w-[1400px] mx-auto px-6 lg:px-10 py-10 lg:py-16">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-start">
+            {/* Left: cover image - container adapts to image ratio */}
+            <div className="relative w-full rounded-xl overflow-hidden lg:sticky lg:top-36 bg-[var(--color-grey-soft)]">
+              {project.cover_image && (
+                <img
+                  src={project.cover_image as string}
+                  alt={project.title as string}
+                  className="w-full h-auto block"
+                  style={{ maxWidth: "100%", objectPosition: (project.cover_position as string) || "50% 50%" }}
+                />
               )}
             </div>
 
-            <p className="mt-8 text-base leading-relaxed" style={{ color: "var(--color-charcoal)" }}>
-              {(project.description as string) ?? ""}
-            </p>
 
-            {Array.isArray(project.tools) && (project.tools as string[]).length > 0 && (
-              <div className="mt-10">
-                <div className="label-mono text-xs text-muted-foreground mb-3">Outils utilisés</div>
-                <div className="flex flex-wrap gap-3">
-                  {(project.tools as string[]).map((t) => (
-                    <ToolBadge key={t} name={t} size={36} />
-                  ))}
-                </div>
+            {/* Right: meta + description */}
+            <div>
+              <h1 className="text-h1 leading-tight" style={{ color: "var(--color-navy, #1B2A4A)" }}>
+                {project.title as string}
+              </h1>
+
+              <div className="mt-8 grid grid-cols-2 gap-6 pb-8 border-b" style={{ borderColor: "var(--color-border)" }}>
+                {project.client && (
+                  <div>
+                    <div className="label-mono text-xs text-muted-foreground">Client</div>
+                    <div className="mt-1 text-sm" style={{ color: "var(--color-charcoal)" }}>{project.client as string}</div>
+                  </div>
+                )}
+                {project.year && (
+                  <div>
+                    <div className="label-mono text-xs text-muted-foreground">Année</div>
+                    <div className="mt-1 text-sm" style={{ color: "var(--color-charcoal)" }}>{project.year as number}</div>
+                  </div>
+                )}
               </div>
-            )}
+
+              <p className="mt-8 text-base leading-relaxed" style={{ color: "var(--color-charcoal)" }}>
+                {(project.description as string) ?? ""}
+              </p>
+
+              {Array.isArray(project.tools) && (project.tools as string[]).length > 0 && (
+                <div className="mt-10">
+                  <div className="label-mono text-xs text-muted-foreground mb-3">Outils utilisés</div>
+                  <div className="flex flex-wrap gap-3">
+                    {(project.tools as string[]).map((t) => (
+                      <ToolBadge key={t} name={t} size={36} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </ScrollFadeSection>
 
       {/* Gallery */}
       {gallery.length > 0 && (
-        <section className="max-w-[1400px] mx-auto px-6 lg:px-10 pb-24 space-y-6">
-          <div className="label-mono text-xs" style={{ color: "var(--color-blue-accent)" }}>Galerie</div>
-          {gallery.map((url, i) => (
-            <img
-              key={i}
-              src={url}
-              alt={`${project.title} — visuel ${i + 1}`}
-              className="w-full max-h-[70vh] object-contain rounded-lg mx-auto bg-black/5"
-              loading="lazy"
-            />
-          ))}
-        </section>
+        <ScrollFadeSection>
+          <section className="max-w-[1400px] mx-auto px-6 lg:px-10 pb-24 space-y-6">
+            <div className="label-mono text-xs" style={{ color: "var(--color-blue-accent)" }}>Galerie</div>
+            {gallery.map((url, i) => (
+              <img
+                key={i}
+                src={url}
+                alt={`${project.title} — visuel ${i + 1}`}
+                className="w-full max-h-[70vh] object-contain rounded-lg mx-auto bg-black/5"
+                loading="lazy"
+              />
+            ))}
+          </section>
+        </ScrollFadeSection>
       )}
 
       {/* Related */}
       {related.length > 0 && (
-        <section className="py-20" style={{ background: "var(--color-grey-soft)" }}>
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-            <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Projets similaires</div>
-            <div className="grid md:grid-cols-3 gap-6 mt-8">
-              {related.map((p) => {
-                const c = categoryMeta(p.category as string);
-                return (
-                  <Link
-                    key={p.id as string}
-                    to="/portfolio/$slug"
-                    params={{ slug: p.slug as string }}
-                    data-cursor="project"
-                    className="group relative block overflow-hidden rounded-lg aspect-[4/5]"
-                    style={{ background: `linear-gradient(160deg, ${c.color}, var(--color-beret))` }}
-                  >
-                    {p.cover_image && <img src={p.cover_image as string} alt={p.title as string} loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: (p.cover_position as string) || "50% 50%" }} />}
-                    <div className="absolute inset-x-0 bottom-0 p-4 text-white" style={{ background: "linear-gradient(to top, rgba(0,0,0,.7), transparent)" }}>
-                      <div className="label-mono opacity-80">{c.emoji} {c.label}</div>
-                      <div className="font-display text-lg mt-1">{p.title as string}</div>
-                    </div>
-                  </Link>
-                );
-              })}
+        <ScrollFadeSection>
+          <section className="py-20" style={{ background: "var(--color-grey-soft)" }}>
+            <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+              <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Projets similaires</div>
+              <div className="grid md:grid-cols-3 gap-6 mt-8">
+                {related.map((p) => {
+                  const c = categoryMeta(p.category as string);
+                  return (
+                    <Link
+                      key={p.id as string}
+                      to="/portfolio/$slug"
+                      params={{ slug: p.slug as string }}
+                      data-cursor="project"
+                      className="group relative block overflow-hidden rounded-lg aspect-[4/5]"
+                      style={{ background: `linear-gradient(160deg, ${c.color}, var(--color-beret))` }}
+                    >
+                      {p.cover_image && <img src={p.cover_image as string} alt={p.title as string} loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: (p.cover_position as string) || "50% 50%" }} />}
+                      <div className="absolute inset-x-0 bottom-0 p-4 text-white" style={{ background: "linear-gradient(to top, rgba(0,0,0,.7), transparent)" }}>
+                        <div className="label-mono opacity-80">{c.emoji} {c.label}</div>
+                        <div className="font-display text-lg mt-1">{p.title as string}</div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </ScrollFadeSection>
       )}
     </article>
   );

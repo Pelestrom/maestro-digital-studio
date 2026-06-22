@@ -115,7 +115,14 @@ export function Navbar() {
 
 export function Footer() {
   return (
-    <footer style={{ background: "var(--color-beret)", color: "#fff" }}>
+    <footer
+      style={{
+        background: "linear-gradient(to bottom, #0d0d0d, #1A1A1A)",
+        color: "#fff",
+        borderTop: "1px solid rgba(255,255,255,0.12)",
+        marginTop: "80px"
+      }}
+    >
       <div className="container-x py-16 grid gap-12 md:grid-cols-3">
         <div>
           <img

@@ -571,14 +571,17 @@ function ProjectEditor({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-      style={{ background: "rgba(0,0,0,0.55)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.55)", overscrollBehavior: "contain" }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onCancel();
+      }}
     >
       <div
-        className="bg-background rounded-2xl border w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto relative"
+        className="bg-background rounded-2xl border w-full max-w-2xl max-h-[85vh] flex flex-col"
         style={{ borderColor: "var(--color-border)" }}
       >
-        <div className="p-6 border-b sticky top-0 bg-background z-10 flex items-center justify-between gap-4"
+        <div className="p-6 border-b flex items-center justify-between gap-4 flex-shrink-0"
              style={{ borderColor: "var(--color-border)" }}>
           <h2 className="font-display text-2xl">
             {isNew ? "Nouveau projet" : "Éditer le projet"}
@@ -596,7 +599,7 @@ function ProjectEditor({
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto flex-1" style={{ overscrollBehavior: "contain" }}>
           <Field label="Titre *">
             <input
               required
@@ -733,7 +736,7 @@ function ProjectEditor({
           </div>
         </div>
 
-        <div className="p-6 border-t flex justify-end gap-2 sticky bottom-0 bg-background"
+        <div className="p-6 border-t flex justify-end gap-2 flex-shrink-0 bg-background"
              style={{ borderColor: "var(--color-border)" }}>
           <button
             onClick={onCancel}

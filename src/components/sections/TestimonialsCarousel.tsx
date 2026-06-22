@@ -35,7 +35,7 @@ const TESTIMONIALS = [
 
 export function TestimonialsCarousel() {
   return (
-    <section className="py-24" style={{ background: "#1A1A1A", color: "#fff" }}>
+    <section className="py-24 border-t border-white/10" style={{ background: "#1A1A1A", color: "#fff" }}>
       <div className="container-x">
         <div className="mb-12">
           <div className="label-mono" style={{ color: "var(--color-blue-accent)" }}>Témoignages</div>
