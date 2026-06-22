@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Grid3X3 } from "lucide-react";
+import { ArrowLeft, Grid3x2 as Grid3X3 } from "lucide-react";
 import { CATEGORIES, categoryMeta, projectsQuery } from "@/lib/queries";
 import { CATEGORY_ICONS } from "@/components/ui/CategorySelect";
 import { FolderIcon } from "@/components/portfolio/FolderIcon";
