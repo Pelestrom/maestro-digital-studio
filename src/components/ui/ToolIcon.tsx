@@ -1,11 +1,11 @@
-import photoshopAsset from "@/assets/photoshop.png.asset.json";
-import canvaAsset from "@/assets/canva.png.asset.json";
-import dalleAsset from "@/assets/dalle.jpg.asset.json";
+import photoshopImg from "@/assets/photoshop.png";
+import canvaImg from "@/assets/canva.png";
+import dalleImg from "@/assets/dalle.jpg";
 
 const MAP: Array<{ match: RegExp; url: string; label: string }> = [
-  { match: /photoshop|ps\b/i, url: photoshopAsset.url, label: "Photoshop" },
-  { match: /canva/i, url: canvaAsset.url, label: "Canva" },
-  { match: /dall[\s\W]?e|openai/i, url: dalleAsset.url, label: "DALL·E" },
+  { match: /photoshop|ps\b/i, url: photoshopImg, label: "Photoshop" },
+  { match: /canva/i, url: canvaImg, label: "Canva" },
+  { match: /dall[\s\W]?e|openai/i, url: dalleImg, label: "DALL·E" },
 ];
 
 export function toolIconFor(name: string) {

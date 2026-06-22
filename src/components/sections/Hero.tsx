@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { aboutContentQuery } from "@/lib/queries";
 import { useCountUp, useInView } from "@/lib/hooks/useCountUp";
-import beretAsset from "@/assets/maestro-beret.png.asset.json";
-import seatedAsset from "@/assets/maestro-seated.png.asset.json";
+import beretImg from "@/assets/maestro-beret.png";
+import seatedImg from "@/assets/maestro-seated.png";
 
-const DEFAULT_PHOTOS = [beretAsset.url, seatedAsset.url];
+const DEFAULT_PHOTOS = [beretImg, seatedImg];
 
 export function PhotoCarousel3D() {
   const { data: about } = useQuery(aboutContentQuery());

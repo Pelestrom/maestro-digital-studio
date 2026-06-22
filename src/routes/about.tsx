@@ -8,7 +8,7 @@ import {
 } from "@/lib/queries";
 import { useInView } from "@/lib/hooks/useCountUp";
 import { ScrollFadeSection } from "@/components/scroll/ScrollFadeSection";
-import seatedAsset from "@/assets/maestro-seated.png.asset.json";
+import seatedImg from "@/assets/maestro-seated.png";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -46,7 +46,7 @@ function AboutPage() {
           </div>
           <div className="relative aspect-[4/5] rounded-2xl overflow-hidden glow-ring group" style={{ background: "var(--color-grey-soft)" }}>
             <img
-              src={(about?.profile_photo as string) || seatedAsset.url}
+              src={(about?.profile_photo as string) || seatedImg}
               alt="Le Maestro du Digital"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.05]"
             />
