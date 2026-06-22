@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import mdLogo from "@/assets/md-logo.png";
+import mdLogo from "@/assets/md.png";
 
 const NAV = [
   { to: "/", label: "Accueil" },
