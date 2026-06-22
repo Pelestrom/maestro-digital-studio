@@ -126,7 +126,7 @@ export function Footer() {
       <div className="container-x py-16 grid gap-12 md:grid-cols-3">
         <div>
           <img
-            src={mdLogo}
+            src={mdLogo.url}
             alt="Le Maestro du Digital — Logo MD"
             width={96}
             height={96}
