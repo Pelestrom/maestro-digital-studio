@@ -95,6 +95,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "Le Maestro du Digital" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#1A1A1A" },
+      { name: "twitter:title", content: "Le Maestro du Digital — Graphic Designer & Directeur Artistique" },
+      { name: "description", content: "Découvrez mon portfolio — Graphic Designer & Directeur Artistique, Je conçois des identités visuelles percutantes pour des marques ambitieuses !" },
+      { property: "og:description", content: "Découvrez mon portfolio — Graphic Designer & Directeur Artistique, Je conçois des identités visuelles percutantes pour des marques ambitieuses !" },
+      { name: "twitter:description", content: "Découvrez mon portfolio — Graphic Designer & Directeur Artistique, Je conçois des identités visuelles percutantes pour des marques ambitieuses !" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/PVeCDLFTAcc1DaNEFwGLc3cibDJ3/social-images/social-1782181593548-Capture_d_écran_2026-06-23_032618.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/PVeCDLFTAcc1DaNEFwGLc3cibDJ3/social-images/social-1782181593548-Capture_d_écran_2026-06-23_032618.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
