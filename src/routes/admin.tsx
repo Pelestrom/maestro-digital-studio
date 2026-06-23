@@ -7,6 +7,7 @@ import {
   bootstrapAdmin,
   isCurrentUserAdmin,
   adminListMessages,
+  adminListProjects,
   adminMarkMessageRead,
   adminDeleteMessage,
   adminSetMessageStatus,
@@ -106,6 +107,7 @@ function AdminPage() {
 
   const checkAdmin = useServerFn(isCurrentUserAdmin);
   const listMessages = useServerFn(adminListMessages);
+  const listProjects = useServerFn(adminListProjects);
   const markRead = useServerFn(adminMarkMessageRead);
   const setStatus = useServerFn(adminSetMessageStatus);
   const delMsg = useServerFn(adminDeleteMessage);
@@ -144,15 +146,13 @@ function AdminPage() {
   }, [session, checkAdmin, listMessages]);
 
   async function refreshProjects() {
-    const { data, error } = await supabase
-      .from("projects" as any)
-      .select("*")
-      .order("sort_order", { ascending: true });
-    if (error) {
-      console.error(error);
-      return;
+    try {
+      const data = (await listProjects()) as Project[];
+      setProjects(data ?? []);
+    } catch (e) {
+      console.error("refreshProjects failed:", e);
+      setProjects([]);
     }
-    setProjects((data ?? []) as unknown as Project[]);
   }
 
   async function handleLogin(e: React.FormEvent) {
