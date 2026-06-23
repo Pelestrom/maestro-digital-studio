@@ -10,10 +10,10 @@ const DEFAULT_PHOTOS = [beretImg, seatedImg];
 
 export function PhotoCarousel3D() {
   const { data: about } = useQuery(aboutContentQuery());
-  const photos: string[] =
-    Array.isArray(about?.hero_photos) && about!.hero_photos.length > 0
-      ? (about!.hero_photos as string[])
-      : DEFAULT_PHOTOS;
+  const dbPhotos = Array.isArray(about?.hero_photos)
+    ? (about!.hero_photos as string[]).filter((u) => u && !u.startsWith("/__l5e/"))
+    : [];
+  const photos: string[] = dbPhotos.length > 0 ? dbPhotos : DEFAULT_PHOTOS;
 
   const [index, setIndex] = useState(0);
   const [flipping, setFlipping] = useState(false);

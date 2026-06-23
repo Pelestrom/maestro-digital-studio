@@ -9,6 +9,7 @@ import {
 import { useInView } from "@/lib/hooks/useCountUp";
 import { ScrollFadeSection } from "@/components/scroll/ScrollFadeSection";
 import seatedImg from "@/assets/maestro-seated.png";
+import { toolIconFor } from "@/components/ui/ToolIcon";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -46,7 +47,11 @@ function AboutPage() {
           </div>
           <div className="relative aspect-[4/5] rounded-2xl overflow-hidden glow-ring group" style={{ background: "var(--color-grey-soft)" }}>
             <img
-              src={(about?.profile_photo as string) || seatedImg}
+              src={
+                (about?.profile_photo as string | undefined)?.startsWith("/__l5e/")
+                  ? seatedImg
+                  : (about?.profile_photo as string | undefined) || seatedImg
+              }
               alt="Le Maestro du Digital"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.05]"
             />
@@ -168,15 +173,20 @@ function ToolCard({ tool }: { tool: any }) {
         className="w-14 h-14 rounded-[10px] flex items-center justify-center overflow-hidden"
         style={{ background: "var(--color-grey-soft)" }}
       >
-        {tool.icon_url ? (
-          <img
-            src={tool.icon_url}
-            alt={`${tool.name} logo`}
-            className="w-10 h-10 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
-          />
-        ) : (
-          <div className="font-display text-2xl" style={{ color: tool.brand_color }}>{(tool.name as string).slice(0, 2)}</div>
-        )}
+        {(() => {
+          const local = toolIconFor(tool.name as string);
+          const dbIcon = (tool.icon_url as string | undefined);
+          const iconSrc = local?.url ?? (dbIcon?.startsWith("/__l5e/") ? undefined : dbIcon);
+          return iconSrc ? (
+            <img
+              src={iconSrc}
+              alt={`${tool.name} logo`}
+              className="w-10 h-10 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
+            />
+          ) : (
+            <div className="font-display text-2xl" style={{ color: tool.brand_color }}>{(tool.name as string).slice(0, 2)}</div>
+          );
+        })()}
       </div>
       <h3 className="font-display text-2xl mt-6 transition-colors" style={{}}>
         {tool.name as string}
