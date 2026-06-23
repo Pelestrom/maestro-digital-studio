@@ -99,8 +99,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Découvrez mon portfolio — Graphic Designer & Directeur Artistique, Je conçois des identités visuelles percutantes pour des marques ambitieuses !" },
       { property: "og:description", content: "Découvrez mon portfolio — Graphic Designer & Directeur Artistique, Je conçois des identités visuelles percutantes pour des marques ambitieuses !" },
       { name: "twitter:description", content: "Découvrez mon portfolio — Graphic Designer & Directeur Artistique, Je conçois des identités visuelles percutantes pour des marques ambitieuses !" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/PVeCDLFTAcc1DaNEFwGLc3cibDJ3/social-images/social-1782181593548-Capture_d_écran_2026-06-23_032618.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/PVeCDLFTAcc1DaNEFwGLc3cibDJ3/social-images/social-1782181593548-Capture_d_écran_2026-06-23_032618.webp" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/PVeCDLFTAcc1DaNEFwGLc3cibDJ3/social-images/social-1782182587759-maestro-beret_-_Copie.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/PVeCDLFTAcc1DaNEFwGLc3cibDJ3/social-images/social-1782182587759-maestro-beret_-_Copie.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
