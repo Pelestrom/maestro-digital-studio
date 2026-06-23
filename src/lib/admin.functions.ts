@@ -59,12 +59,34 @@ export const adminListMessages = createServerFn({ method: "GET" })
     });
     if (!isAdmin) throw new Error("Forbidden");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("messages")
       .select("*")
       .order("created_at", { ascending: false });
-    if (error) throw error;
+    if (error) {
+      console.error("adminListMessages supabase error:", error);
+      throw error;
+    }
+    return data ?? [];
+  });
+
+export const adminListProjects = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+
+    const { data, error } = await context.supabase
+      .from("projects")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    if (error) {
+      console.error("adminListProjects supabase error:", error);
+      throw error;
+    }
     return data ?? [];
   });
 
@@ -77,12 +99,14 @@ export const adminMarkMessageRead = createServerFn({ method: "POST" })
       _role: "admin",
     });
     if (!isAdmin) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("messages")
       .update({ is_read: data.isRead, status: data.isRead ? "read" : "new" } as any)
       .eq("id", data.id);
-    if (error) throw error;
+    if (error) {
+      console.error("adminMarkMessageRead supabase error:", error);
+      throw error;
+    }
     return { ok: true };
   });
 
@@ -97,12 +121,14 @@ export const adminSetMessageStatus = createServerFn({ method: "POST" })
       _role: "admin",
     });
     if (!isAdmin) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("messages")
       .update({ status: data.status, is_read: data.status !== "new" } as any)
       .eq("id", data.id);
-    if (error) throw error;
+    if (error) {
+      console.error("adminSetMessageStatus supabase error:", error);
+      throw error;
+    }
     return { ok: true };
   });
 
@@ -115,8 +141,10 @@ export const adminDeleteMessage = createServerFn({ method: "POST" })
       _role: "admin",
     });
     if (!isAdmin) throw new Error("Forbidden");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("messages").delete().eq("id", data.id);
-    if (error) throw error;
+    const { error } = await context.supabase.from("messages").delete().eq("id", data.id);
+    if (error) {
+      console.error("adminDeleteMessage supabase error:", error);
+      throw error;
+    }
     return { ok: true };
   });
