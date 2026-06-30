@@ -75,7 +75,7 @@ export const submitContact = createServerFn({ method: "POST" })
     }
 
     // Best-effort emails via Resend direct
-    const resendKey = process.env.RESEND_API_KEY;
+    const resendKey = process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY;
     let emailSent = false;
 
     if (resendKey) {
