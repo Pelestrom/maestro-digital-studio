@@ -74,23 +74,21 @@ export const submitContact = createServerFn({ method: "POST" })
       throw new Error("Impossible d'enregistrer votre message.");
     }
 
-    // Best-effort emails via Resend connector
-    const lovableKey = process.env.LOVABLE_API_KEY;
+    // Best-effort emails via Resend direct
     const resendKey = process.env.RESEND_API_KEY;
     let emailSent = false;
 
-    if (lovableKey && resendKey) {
+    if (resendKey) {
       try {
         const designerEmail = "le.maestro.du.digital@gmail.com";
         const firstName = data.name.split(" ")[0];
-        const portfolioUrl = "https://le-maestro-du-digital.lovable.app";
+        const portfolioUrl = process.env.SITE_URL || "https://le-maestro-du-digital.lovable.app";
 
-        await fetch("https://connector-gateway.lovable.dev/resend/emails", {
+        await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${lovableKey}`,
-            "X-Connection-Api-Key": resendKey,
+            Authorization: `Bearer ${resendKey}`,
           },
           body: JSON.stringify({
             from: "Le Maestro Portfolio <onboarding@resend.dev>",
@@ -101,12 +99,11 @@ export const submitContact = createServerFn({ method: "POST" })
           }),
         });
 
-        await fetch("https://connector-gateway.lovable.dev/resend/emails", {
+        await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${lovableKey}`,
-            "X-Connection-Api-Key": resendKey,
+            Authorization: `Bearer ${resendKey}`,
           },
           body: JSON.stringify({
             from: "Le Maestro du Digital <onboarding@resend.dev>",
@@ -115,41 +112,14 @@ export const submitContact = createServerFn({ method: "POST" })
             html: autoReplyHtml(firstName, portfolioUrl),
           }),
         });
+
         emailSent = true;
       } catch (e) {
         console.error("[contact] resend send failed", e);
       }
     }
 
-    // WhatsApp Business auto-reply (best-effort via Twilio connector if configured)
-    const twilioKey = process.env.TWILIO_API_KEY;
-    const twilioFrom = process.env.TWILIO_WHATSAPP_FROM; // e.g. "whatsapp:+14155238886"
-    let whatsappSent = false;
-    if (lovableKey && twilioKey && twilioFrom) {
-      try {
-        const body = `Bonjour ${data.name.split(" ")[0]},\n\nMerci pour votre message et l'intérêt porté à mes services. Votre demande a bien été reçue. Je reviendrai vers vous très prochainement afin d'échanger sur votre projet.\n\nÀ bientôt,\nLe Maestro du Digital`;
-        const params = new URLSearchParams({
-          To: `whatsapp:${data.whatsapp}`,
-          From: twilioFrom,
-          Body: body,
-        });
-        const r = await fetch("https://connector-gateway.lovable.dev/twilio/Messages.json", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${lovableKey}`,
-            "X-Connection-Api-Key": twilioKey,
-          },
-          body: params.toString(),
-        });
-        whatsappSent = r.ok;
-        if (!r.ok) console.error("[contact] twilio whatsapp failed", await r.text());
-      } catch (e) {
-        console.error("[contact] twilio whatsapp failed", e);
-      }
-    }
-
-    return { ok: true, emailSent, whatsappSent };
+    return { ok: true, emailSent };
   });
 
 function notificationHtml(d: ContactInput, ip: string) {
