@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 export const ContactSchema = z.object({
   name: z.string().trim().min(2, "Nom requis").max(120),
@@ -36,7 +37,7 @@ function rateLimit(key: string, limit = 5, windowMs = 60_000): boolean {
 }
 
 export const submitContact = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => ContactSchema.parse(input))
+  .validator((input: unknown) => ContactSchema.parse(input))
   .handler(async ({ data }) => {
     // Capture IP & rate-limit
     let ip = "";
@@ -49,26 +50,24 @@ export const submitContact = createServerFn({ method: "POST" })
     } catch {
       ip = "";
     }
+
     const rlKey = ip || data.email.toLowerCase();
     if (!rateLimit(rlKey)) {
       throw new Error("Trop de tentatives. Veuillez réessayer dans une minute.");
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { error: insertError } = await supabaseAdmin
-      .from("messages" as any)
-      .insert({
-        name: data.name,
-        email: data.email,
-        project_type: data.projectType,
-        message: data.message,
-        whatsapp: data.whatsapp,
-        country_code: data.countryCode,
-        source_page: data.sourcePage || null,
-        ip_address: ip || null,
-        status: "new",
-      });
+    const { error: insertError } = await supabase.from("messages" as any).insert({
+      name: data.name,
+      email: data.email,
+      project_type: data.projectType,
+      message: data.message,
+      whatsapp: data.whatsapp,
+      country_code: data.countryCode,
+      source_page: data.sourcePage || null,
+      ip_address: ip || null,
+      status: "new",
+      is_read: false,
+    });
 
     if (insertError) {
       console.error("[contact] insert failed", insertError);

@@ -92,7 +92,7 @@ export const adminListProjects = createServerFn({ method: "GET" })
 
 export const adminMarkMessageRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { id: string; isRead: boolean }) => data)
+  .validator((data: { id: string; isRead: boolean }) => data)
   .handler(async ({ context, data }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
@@ -112,7 +112,7 @@ export const adminMarkMessageRead = createServerFn({ method: "POST" })
 
 export const adminSetMessageStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
+  .validator(
     (data: { id: string; status: "new" | "read" | "in_progress" | "replied" | "archived" }) => data,
   )
   .handler(async ({ context, data }) => {
@@ -134,7 +134,7 @@ export const adminSetMessageStatus = createServerFn({ method: "POST" })
 
 export const adminDeleteMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { id: string }) => data)
+  .validator((data: { id: string }) => data)
   .handler(async ({ context, data }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
